@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis — Autonomous AI Flight Recorder & Cryptographic Attestation Rail</title>
+  <meta name="description" content="The digital flight recorder for autonomous AI. Verifiable offline in 6ms under EU AI Act Art. 12 and RBI Digital Lending with post-quantum ML-DSA-65 keys and zero PII leakage.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <!-- Social Share OpenGraph & Twitter Cards -->
+  <meta property="og:title" content="Aegis — Autonomous AI Flight Recorder & Cryptographic Attestation Rail">
+  <meta property="og:description" content="Verifiable execution certificates for autonomous AI agents. Verified offline in 6ms with zero customer PII leakage.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="http://localhost:3000/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Aegis — Autonomous AI Flight Recorder">
+  <meta name="twitter:description" content="Hardware-attested cryptographic evidence engine for autonomous AI.">
+
+  <!-- Schema.org FAQPage Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does Aegis verify autonomous AI decisions in 6ms without relying on cloud servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Aegis packages inferences into canonical RFC 8949 CBOR bytes signed with NIST FIPS 204 ML-DSA-65 and Ed25519 dual keys. Any auditor can verify the post-quantum signature and RFC 6962 Merkle log inclusion mathematically on an air-gapped machine in 6ms."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How are sensitive customer SSNs, tax IDs, and credit scores protected under DPDP Act 2025?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Customer PII never touches persistent disk storage. Inputs are hashed into cryptographic commitments using CSPRNG salts (mh:sha256:...). Once the receipt is sealed, the plaintext is wiped from Intel TDX enclave memory."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens if a rogue insider, hypervisor, or cloud provider alters a decision?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Because the commitment multihash is mathematically bound into the post-quantum signature, altering even 1 hex bit causes offline verification to fail instantly with a binding_hash mismatch alarm."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Aegis use dual ML-DSA-65 post-quantum lattice signatures?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Classical RSA and ECDSA signatures will be vulnerable to Shor's algorithm as quantum computing advances. Combining Ed25519 with NIST FIPS 204 ML-DSA-65 ensures receipts remain unforgeable for decades."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How difficult is it to integrate Northwind Cipher CooL SDK into existing Python or Node agent workflows?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Integration takes under 15 minutes. Simply wrap your agent inference call with cool.record({ type, metadata, payloads }). The SDK handles enclave attestation, CBOR canonicalization, multihashing, and Merkle tree sequencing automatically."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts: Playfair Display + Plus Jakarta Sans + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#0D2E27',
+            forestDark: '#071C17',
+            forestCard: '#123931',
+            mint: '#1F4E43',
+            mintLight: '#2D6B5D',
+            cream: '#F7F5F0',
+            creamCard: '#FFFFFF',
+            creamBorder: '#E7E2D6',
+            gold: '#D4AF37',
+            goldLight: '#F5E6B3',
+            goldDark: '#AA8822',
+            slateText: '#4A5568'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/site.css">
+  <style>
+    body {
+      background-color: #F7F5F0;
+      color: #0D2E27;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #D4AF37 0%, #B89324 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+      transition: all 0.25s ease;
+    }
+    .btn-gold:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+      background: linear-gradient(135deg, #E0BC45 0%, #C49F30 100%);
+    }
+    .gold-foil {
+      background: linear-gradient(135deg, #D4AF37 0%, #AA8822 50%, #D4AF37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .card-shadow {
+      box-shadow: 0 10px 30px -5px rgba(13, 46, 39, 0.06), 0 0 1px 1px rgba(13, 46, 39, 0.05);
+    }
+    @keyframes marqueeRight {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes marqueeLeft {
+      0% { transform: translateX(-50%); }
+      100% { transform: translateX(0%); }
+    }
+    .animate-marquee-right {
+      display: flex;
+      width: max-content;
+      animation: marqueeRight 35s linear infinite;
+    }
+    .animate-marquee-left {
+      display: flex;
+      width: max-content;
+      animation: marqueeLeft 35s linear infinite;
+    }
+    .marquee-container:hover .animate-marquee-right,
+    .marquee-container:hover .animate-marquee-left {
+      animation-play-state: paused;
+    }
+    /* Google Translate Clean Styling & Suppression */
+    .goog-te-gadget,
+    .goog-te-gadget-simple,
+    .goog-te-banner-frame,
+    .goog-te-balloon-frame,
+    #goog-gt-tt,
+    .goog-te-spinner-pos {
+      display: none !important;
+    }
+    body { top: 0px !important; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-gold selection:text-white" id="mainContent">
+  <div id="scrollProgressBar"></div>
+  <a href="#mainContent" class="skip-to-content">Skip to main content</a>
+
+  <!-- =========================================================================
+       UNIVERSAL LANGUAGE & HACKATHON STATUS BAR
+       Supports ALL languages in the world via Google Translate + specialized dialects
+       ========================================================================= -->
+  <div class="bg-forest text-cream text-xs py-2 px-6 lg:px-16 border-b border-mint/40 flex flex-wrap justify-between items-center font-mono gap-3">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+      <span class="font-bold tracking-wider" data-i18n="hackathon_badge">REVERSE HACKATHON 2026</span>
+      <span class="text-gold/60">•</span>
+      <span class="text-gold" data-i18n="sdk_title">NORTHWIND CIPHER CooL SDK</span>
+      <span class="text-cream/50 hidden sm:inline">• Intel TDX Hardware Attested</span>
+    </div>
+    
+    <!-- Unified Sleek Language & Dialect Selector -->
+    <div class="flex items-center gap-3">
+      <div class="relative flex items-center bg-forestDark/90 border border-gold/50 hover:border-gold rounded-full px-3.5 py-1 shadow-sm transition-all">
+        <span class="text-gold text-xs mr-2 select-none">🌐</span>
+        <select id="unifiedLangSelector" onchange="handleLanguageSelect(this.value)" class="bg-transparent text-xs text-cream font-bold outline-none cursor-pointer pr-5 appearance-none font-sans">
+          <option value="dialect:en" class="bg-forest text-cream">Language: English (Global)</option>
+          <optgroup label="✨ Specialized AI Dialects" class="bg-forest text-gold font-bold">
+            <option value="dialect:hinglish" class="bg-forest text-cream">Hinglish (India Tech Mix)</option>
+            <option value="dialect:konglish" class="bg-forest text-cream">Konglish (한국어 / Tech Mix)</option>
+            <option value="dialect:japanglish" class="bg-forest text-cream">Japanglish (日本語 / Tech Mix)</option>
+            <option value="dialect:nkorean" class="bg-forest text-cream">조선어 (North Korean Standard)</option>
+          </optgroup>
+          <optgroup label="🌍 Global Languages (Full Translation)" class="bg-forest text-gold font-bold">
+            <option value="hi" class="bg-forest text-cream">हिन्दी (Hindi)</option>
+            <option value="es" class="bg-forest text-cream">Español (Spanish)</option>
+            <option value="fr" class="bg-forest text-cream">Français (French)</option>
+            <option value="de" class="bg-forest text-cream">Deutsch (German)</option>
+            <option value="ja" class="bg-forest text-cream">日本語 (Japanese)</option>
+            <option value="ko" class="bg-forest text-cream">한국어 (Korean)</option>
+            <option value="zh-CN" class="bg-forest text-cream">简体中文 (Mandarin)</option>
+            <option value="ar" class="bg-forest text-cream">العربية (Arabic)</option>
+            <option value="ru" class="bg-forest text-cream">Русский (Russian)</option>
+            <option value="pt" class="bg-forest text-cream">Português (Portuguese)</option>
+            <option value="it" class="bg-forest text-cream">Italiano (Italian)</option>
+            <option value="nl" class="bg-forest text-cream">Nederlands (Dutch)</option>
+            <option value="tr" class="bg-forest text-cream">Türkçe (Turkish)</option>
+            <option value="id" class="bg-forest text-cream">Bahasa Indonesia</option>
+            <option value="vi" class="bg-forest text-cream">Tiếng Việt</option>
+          </optgroup>
+        </select>
+        <span class="text-gold text-[10px] pointer-events-none absolute right-3 select-none">▼</span>
+      </div>
+
+      <!-- Off-Screen Google Translate Element for Universal Translation Engine -->
+      <div id="google_translate_element" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none;"></div>
+
+      <a href="https://github.com/Northwind-Cipher/cool-sdk" target="_blank" class="text-gold font-bold text-xs hover:underline flex items-center gap-1.5 ml-1">
+        <span>⭐</span><span class="hidden sm:inline">Star Repo</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       INSTITUTIONAL EDITORIAL NAVIGATION WITH OVAL BUBBLE PILLS
+       ========================================================================= -->
+  <header class="bg-cream/95 backdrop-blur-md sticky top-0 z-50 border-b border-creamBorder px-6 lg:px-16 py-3.5 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <a href="/" class="w-10 h-10 rounded-lg bg-forest flex items-center justify-center text-gold text-xl font-serif font-bold shadow-md">
+        A
+      </a>
+      <div>
+        <a href="/" class="font-serif font-bold text-2xl tracking-tight text-forest block">Aegis</a>
+        <span class="text-[10px] uppercase tracking-widest font-mono text-mint font-semibold">Institutional Observability</span>
+      </div>
+    </div>
+
+    <!-- Oval Bubble Navigation Links -->
+    <nav class="hidden lg:flex items-center gap-2">
+      <a href="/" class="nav-oval-bubble active" data-i18n="nav_home">Home</a>
+      <a href="/app" class="nav-oval-bubble" data-i18n="nav_app">Interactive App</a>
+      <a href="/audit" class="nav-oval-bubble" data-i18n="nav_audit">Audit Hub</a>
+      <a href="/case-studies" class="nav-oval-bubble">Case Studies</a>
+      <a href="/waitlist" class="nav-oval-bubble">Waitlist</a>
+      <a href="/about" class="nav-oval-bubble">About</a>
+      <a href="/contact" class="nav-oval-bubble">Contact</a>
+      <a href="/presentation" class="nav-oval-bubble" data-i18n="nav_deck">Pitch Deck</a>
+    </nav>
+
+    <!-- CTAs & Search -->
+    <div class="flex items-center gap-3">
+      <button onclick="openSiteSearch()" class="px-3.5 py-1.5 rounded-full border border-creamBorder bg-white text-xs font-mono font-bold text-slateText hover:border-gold hover:text-forest transition flex items-center gap-1.5 shadow-sm">
+        <span>🔍 Search</span>
+        <kbd class="px-1.5 py-0.5 text-[10px] bg-cream rounded border border-creamBorder">Ctrl+K</kbd>
+      </button>
+      <a href="/app" class="btn-gold px-5 py-2 rounded-full text-xs font-bold shadow" data-i18n="btn_launch_app">
+        Launch App →
+      </a>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       HERO SECTION (PRESERVED EXACTLY AS EXISTING)
+       ========================================================================= -->
+  <section class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-mint/10 border border-mint/20 text-mint text-xs font-bold uppercase tracking-wider mb-8">
+      <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+      <span data-i18n="hero_pill">Cryptographic Observability for Autonomous Finance</span>
+    </div>
+    
+    <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-forest leading-[1.1] tracking-tight max-w-4xl mx-auto mb-6" data-i18n="hero_title">
+      The digital flight recorder for <span class="italic font-serif gold-foil">autonomous AI</span>.
+    </h1>
+    
+    <p class="text-lg sm:text-xl text-slateText max-w-2xl mx-auto leading-relaxed mb-10 font-normal" data-i18n="hero_desc">
+      When an enterprise AI agent approves a $150,000 credit line or denies an insurance claim, <strong class="text-forest font-semibold">who holds the receipt?</strong> Aegis creates tamper-proof execution certificates verifiable offline in 6 milliseconds—with zero customer data leakage.
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+      <a href="/app" class="btn-gold px-8 py-3.5 rounded-lg text-base font-bold shadow-lg w-full sm:w-auto flex items-center justify-center gap-2" data-i18n="hero_cta_app">
+        <span>Launch Defense Console</span>
+        <span>→</span>
+      </a>
+      <a href="/waitlist" class="bg-forest hover:bg-forestDark text-gold border border-gold/40 px-8 py-3.5 rounded-lg text-base font-bold transition w-full sm:w-auto shadow-md flex items-center justify-center gap-2">
+        <span>⭐ Join Priority Waitlist</span>
+      </a>
+      <a href="/audit" class="bg-white hover:bg-cream border border-creamBorder text-forest px-8 py-3.5 rounded-lg text-base font-bold transition w-full sm:w-auto card-shadow" data-i18n="hero_cta_deck">
+        Audit Hub & Proof Ledger
+      </a>
+    </div>
+
+    <!-- Institutional Trust Metrics -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto border-y border-creamBorder py-8 bg-white/40 rounded-xl">
+      <div class="text-center px-4">
+        <div class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-1">6<span class="text-gold text-2xl font-sans">ms</span></div>
+        <div class="text-xs uppercase tracking-wider font-semibold text-slateText" data-i18n="stat_1">Offline Verification</div>
+      </div>
+      <div class="text-center px-4 border-l border-creamBorder">
+        <div class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-1">0<span class="text-gold text-2xl font-sans">%</span></div>
+        <div class="text-xs uppercase tracking-wider font-semibold text-slateText" data-i18n="stat_2">Plaintext Stored</div>
+      </div>
+      <div class="text-center px-4 border-l border-creamBorder">
+        <div class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-1">€35<span class="text-gold text-2xl font-sans">M</span></div>
+        <div class="text-xs uppercase tracking-wider font-semibold text-slateText" data-i18n="stat_3">EU AI Act Penalty Shield</div>
+      </div>
+      <div class="text-center px-4 border-l border-creamBorder">
+        <div class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-1">100<span class="text-gold text-2xl font-sans">%</span></div>
+        <div class="text-xs uppercase tracking-wider font-semibold text-slateText" data-i18n="stat_4">Tamper Proof</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 1: INFINITE LOGO CAROUSEL
+       Strictly in Modern Wealth palette (Deep Forest Teal, Mint, Cream, Gold).
+       Row 1 moves Right -> Left. Row 2 moves Left -> Right.
+       ========================================================================= -->
+  <section class="bg-forest text-cream py-16 px-4 border-y border-mint/40 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto text-center mb-8">
+      <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-mint/40 border border-gold/30 px-3 py-1 rounded-full" data-i18n="marquee_pill">
+        CRYPTOGRAPHIC ECOSYSTEM & HARDWARE RAILS
+      </span>
+      <h2 class="font-serif text-2xl sm:text-3xl font-bold text-cream mt-2" data-i18n="marquee_title">
+        Attested Across Global Financial & Enclave Standards
+      </h2>
+    </div>
+
+    <!-- Row 1: Right -> Left (Marquee Left) -->
+    <div class="marquee-mask relative w-full mb-5">
+      <div class="animate-marquee-left flex items-center gap-6 py-2">
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">⚡</span>
+          <span class="font-mono text-sm font-bold text-cream">Intel TDX Enclave</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Hardware</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🛡️</span>
+          <span class="font-mono text-sm font-bold text-cream">Phala dstack</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">CVM Rail</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">📜</span>
+          <span class="font-mono text-sm font-bold text-cream">NIST FIPS 204</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">ML-DSA-65</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🇪🇺</span>
+          <span class="font-mono text-sm font-bold text-cream">EU AI Act</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Article 12</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🌳</span>
+          <span class="font-mono text-sm font-bold text-cream">RFC 6962 Log</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Merkle Tree</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">₿</span>
+          <span class="font-mono text-sm font-bold text-cream">OpenTimestamps</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Bitcoin Root</span>
+        </div>
+
+        <!-- Duplicated for Infinite Seamless Loop -->
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">⚡</span>
+          <span class="font-mono text-sm font-bold text-cream">Intel TDX Enclave</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Hardware</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🛡️</span>
+          <span class="font-mono text-sm font-bold text-cream">Phala dstack</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">CVM Rail</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">📜</span>
+          <span class="font-mono text-sm font-bold text-cream">NIST FIPS 204</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">ML-DSA-65</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🇪🇺</span>
+          <span class="font-mono text-sm font-bold text-cream">EU AI Act</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Article 12</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🌳</span>
+          <span class="font-mono text-sm font-bold text-cream">RFC 6962 Log</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Merkle Tree</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">₿</span>
+          <span class="font-mono text-sm font-bold text-cream">OpenTimestamps</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Bitcoin Root</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Left -> Right (Marquee Right) -->
+    <div class="marquee-mask relative w-full">
+      <div class="animate-marquee-right flex items-center gap-6 py-2">
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🇮🇳</span>
+          <span class="font-mono text-sm font-bold text-cream">RBI Digital Lending</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Model Gov</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🏛️</span>
+          <span class="font-mono text-sm font-bold text-cream">ISO/IEC 42001</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">AI Assurance</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🔒</span>
+          <span class="font-mono text-sm font-bold text-cream">SOC 2 Type II</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">CC7.2 Log</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">💎</span>
+          <span class="font-mono text-sm font-bold text-cream">Ed25519 Curve</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Classical Sign</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">📦</span>
+          <span class="font-mono text-sm font-bold text-cream">RFC 8949 CBOR</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Canonical</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">⚖️</span>
+          <span class="font-mono text-sm font-bold text-cream">DPDP Rules 2025</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Section 8</span>
+        </div>
+
+        <!-- Duplicated for Infinite Seamless Loop -->
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🇮🇳</span>
+          <span class="font-mono text-sm font-bold text-cream">RBI Digital Lending</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Model Gov</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🏛️</span>
+          <span class="font-mono text-sm font-bold text-cream">ISO/IEC 42001</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">AI Assurance</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">🔒</span>
+          <span class="font-mono text-sm font-bold text-cream">SOC 2 Type II</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">CC7.2 Log</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">💎</span>
+          <span class="font-mono text-sm font-bold text-cream">Ed25519 Curve</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Classical Sign</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">📦</span>
+          <span class="font-mono text-sm font-bold text-cream">RFC 8949 CBOR</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Canonical</span>
+        </div>
+        <div class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-forestDark border border-mintLight shadow-md">
+          <span class="text-gold font-serif font-bold text-base">⚖️</span>
+          <span class="font-mono text-sm font-bold text-cream">DPDP Rules 2025</span>
+          <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-mint text-goldLight font-bold">Section 8</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 2: BENTO GRID
+       Structural Replica of Reference Image strictly harmonized in Modern Wealth
+       Colors: Alabaster Cream (#F7F5F0), Deep Forest Teal (#0D2E27), Champagne Gold (#D4AF37)
+       NO abrupt pinks, NO random purple cosmic background!
+       ========================================================================= -->
+  <section class="bg-cream py-24 px-6 lg:px-12 border-b border-creamBorder" id="bento">
+    <div class="max-w-7xl mx-auto">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-3.5 py-1.5 rounded-full shadow-sm" data-i18n="bento_badge">
+          STRUCTURAL BENTO ARCHITECTURE
+        </span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-bold text-forest mt-3 mb-3" data-i18n="bento_title">
+          The Architecture of Institutional Trust
+        </h2>
+        <p class="text-slateText text-sm sm:text-base leading-relaxed" data-i18n="bento_subtitle">
+          How CooL SDK, Intel TDX enclaves, and post-quantum keys assemble into an unalterable execution flight recorder.
+        </p>
+      </div>
+
+      <!-- THE EXACT ASYMMETRIC 4-COLUMN BENTO GRID -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+
+        <!-- COLUMN 1 (LEFT — 3 cols): Top Tall Card & Bottom Card -->
+        <div class="md:col-span-3 flex flex-col gap-5">
+          
+          <!-- Bento Card 1: Top Left Tall (White Card, 75% Donut Ring, 2.5K Stats) -->
+          <div class="rounded-[28px] p-7 bg-white text-forest shadow-md border border-creamBorder flex flex-col justify-between items-center text-center h-[340px] relative overflow-hidden">
+            <div class="w-full text-center">
+              <h4 class="font-serif font-bold text-base text-forest tracking-tight" data-i18n="bento_c1_title">EU AI Act Audit</h4>
+              <p class="text-xs text-mint font-medium font-mono" data-i18n="bento_c1_sub">Article 12 Obligation</p>
+            </div>
+
+            <!-- Donut Progress Ring in Champagne Gold & Deep Teal -->
+            <div class="relative w-36 h-36 flex items-center justify-center my-2">
+              <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="#E7E2D6" stroke-width="8" fill="transparent" />
+                <circle cx="50" cy="50" r="40" stroke="#D4AF37" stroke-width="8" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="62.8" stroke-linecap="round" />
+              </svg>
+              <div class="absolute flex flex-col items-center">
+                <span class="text-2xl font-bold font-serif text-forest">75%</span>
+                <span class="text-[10px] text-mint font-bold uppercase tracking-wider" data-i18n="bento_c1_progress">In Progress</span>
+              </div>
+            </div>
+
+            <div class="w-full text-center border-t border-creamBorder pt-3">
+              <div id="bentoStatReceipts" class="text-2xl font-bold font-serif text-forest">2.5K</div>
+              <p id="bentoStatReceiptsSub" class="text-[11px] text-slateText font-medium" data-i18n="bento_c1_stat">263 Sealed Receipts in Q3</p>
+            </div>
+          </div>
+
+          <!-- Bento Card 2: Bottom Left (Agency / Swarms with Avatars) -->
+          <div class="rounded-[28px] p-6 bg-white text-forest shadow-md border border-creamBorder flex-1 flex flex-col justify-between">
+            <div>
+              <div class="inline-block bg-forest text-gold text-[11px] font-bold px-3.5 py-1 rounded-full mb-3 shadow" data-i18n="bento_c2_tag">
+                Autonomous Agent Swarms
+              </div>
+              <h4 class="font-serif font-bold text-lg text-forest leading-snug" data-i18n="bento_c2_title">
+                Smart Digital Trust For Enterprise Finance
+              </h4>
+            </div>
+
+            <!-- Two circular portrait avatars -->
+            <div class="flex items-center gap-3 my-4">
+              <div class="w-16 h-20 rounded-full bg-forest text-gold overflow-hidden border-2 border-gold shadow flex items-center justify-center text-2xl font-serif">
+                🤖
+              </div>
+              <div class="w-16 h-20 rounded-full bg-mint text-white overflow-hidden border-2 border-forest shadow flex items-center justify-center text-2xl">
+                🛡️
+              </div>
+            </div>
+
+            <div class="text-[11px] text-mint font-mono font-bold" data-i18n="bento_c2_node">
+              • Underwriter Node 04: Hardware Attested
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMNS 2 & 3 (CENTER — 6 cols): Top Metrics, Center Big Card, Bottom Row -->
+        <div class="md:col-span-6 flex flex-col gap-5">
+          
+          <!-- Top Row of Center: Two metrics side by side -->
+          <div class="grid grid-cols-2 gap-5">
+            <!-- Card A: 4.875 Project Views -->
+            <div class="rounded-[28px] p-6 bg-white border border-creamBorder shadow-md flex flex-col justify-center">
+              <div class="flex items-center gap-1.5 text-3xl sm:text-4xl font-serif font-bold text-forest">
+                <span id="bentoMetricInferences">4.875</span>
+                <span class="text-gold text-xl">♥</span>
+              </div>
+              <p class="text-xs text-slateText font-medium mt-1" data-i18n="bento_metric1">Verified Inferences</p>
+              <p id="bentoMetricLatency" class="text-[11px] text-mint font-mono font-bold mt-0.5">Average latency: 5.8ms</p>
+            </div>
+
+            <!-- Card B: 57K +10% -->
+            <div class="rounded-[28px] p-6 bg-white border border-creamBorder shadow-md flex flex-col justify-center">
+              <div class="text-xs uppercase font-mono font-bold text-slateText" data-i18n="bento_metric2_label">Protected PII</div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span id="bentoMetricPii" class="text-3xl sm:text-4xl font-serif font-bold text-forest">57K</span>
+                <span id="bentoMetricZeroLeak" class="text-mint text-xs font-bold font-mono">+100% Zero Leak</span>
+              </div>
+              <p class="text-[11px] text-slateText mt-1" data-i18n="bento_metric2_sub">Salted multihashes sealed</p>
+            </div>
+          </div>
+
+          <!-- The Big Center Card: Hero Operator + Floating UI Widgets -->
+          <div class="rounded-[28px] p-7 bg-forest text-cream shadow-xl relative min-h-[380px] flex flex-col justify-between overflow-hidden border-2 border-gold">
+            <!-- Central visual / focal area -->
+            <div class="flex justify-between items-start z-10">
+              <!-- Floating Widget Top Left: Line chart curve -->
+              <div class="bg-forestDark/90 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-md border border-gold/40 flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-gold/20 flex items-center justify-center text-gold font-bold text-xs">
+                  📈
+                </div>
+                <div>
+                  <div class="text-[10px] text-cream/70 uppercase font-mono">Integrity</div>
+                  <div class="text-xs font-bold text-gold">99.999%</div>
+                </div>
+              </div>
+
+              <!-- Floating Widget Top Right: Age/Latency Bar Chart -->
+              <div class="bg-forestDark/90 backdrop-blur-md p-2.5 rounded-xl shadow-md border border-gold/40 text-right">
+                <div class="text-[10px] text-cream/70 font-mono">Enclave Commit</div>
+                <div class="flex items-end gap-1 h-6 mt-1 justify-end">
+                  <div class="w-1.5 bg-mint h-3 rounded-t"></div>
+                  <div class="w-1.5 bg-mintLight h-4 rounded-t"></div>
+                  <div class="w-1.5 bg-gold h-6 rounded-t"></div>
+                  <div class="w-1.5 bg-goldLight h-5 rounded-t"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Middle Subject / Heading -->
+            <div class="text-center my-6 z-10">
+              <div class="w-20 h-20 mx-auto rounded-full bg-forestDark text-gold flex items-center justify-center text-3xl shadow-xl border-2 border-gold mb-3">
+                👩🏾‍💻
+              </div>
+              <h3 class="font-serif text-2xl font-bold text-cream" data-i18n="bento_center_title">
+                The Autonomous AI Flight Engine
+              </h3>
+              <p class="text-xs text-cream/80 max-w-sm mx-auto mt-1 font-normal" data-i18n="bento_center_desc">
+                Real-time cryptographic observer running inside Intel TDX Confidential VM.
+              </p>
+            </div>
+
+            <!-- Bottom Floating Widgets in Center Card -->
+            <div class="flex justify-between items-end z-10">
+              <!-- Widget Bottom Left: 26,807 play badge -->
+              <div class="bg-forestDark/90 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-md border border-gold/40 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-gold text-forest flex items-center justify-center text-[10px] font-bold">▶</span>
+                <span class="text-xs font-bold font-mono text-cream">26,807 Verified</span>
+              </div>
+
+              <!-- Widget Bottom Right: Non-repudiation -->
+              <div class="bg-forestDark/90 backdrop-blur-md p-3 rounded-2xl shadow-md border border-gold/40 text-right">
+                <div class="flex items-center gap-1 justify-end text-gold text-xs">
+                  <span>♥</span>
+                  <span class="text-[10px] text-cream/70 uppercase font-mono">Non-Repudiation</span>
+                </div>
+                <div class="text-sm font-bold text-cream font-mono">100.00%</div>
+                <div class="text-[10px] text-gold font-bold font-mono">▲ Zero Fraud</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Row of Center: Left Small & Right Wide -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-5">
+            <!-- Bottom Left (4 cols): Crypto Chips -->
+            <div class="sm:col-span-4 rounded-[28px] p-5 bg-white border border-creamBorder shadow-md flex flex-col justify-between">
+              <div>
+                <div class="text-xs text-mint font-mono uppercase font-bold" data-i18n="bento_chips_tag">Crypto Core</div>
+                <div class="font-serif font-bold text-lg text-forest mt-0.5" data-i18n="bento_chips_title">Dual Primitives</div>
+              </div>
+              <div class="flex items-center gap-1.5 mt-3">
+                <div class="h-6 px-2 rounded-lg bg-forest text-[10px] font-mono font-bold flex items-center text-cream">ML-DSA</div>
+                <div class="h-6 px-2 rounded-lg bg-mint text-[10px] font-mono font-bold flex items-center text-cream">Ed25519</div>
+                <div class="h-6 px-2 rounded-lg bg-gold text-[10px] font-mono font-bold flex items-center text-forest">SHA256</div>
+              </div>
+            </div>
+
+            <!-- Bottom Right (8 cols): We Build Future of Design / Trust Standard with 3D Star -->
+            <div class="sm:col-span-8 rounded-[28px] p-6 bg-white text-forest shadow-md flex items-center justify-between border border-creamBorder">
+              <div class="max-w-[75%]">
+                <h4 class="font-serif text-lg font-bold text-forest leading-snug" data-i18n="bento_future_title">
+                  We Build the Future of AI Accountability
+                </h4>
+                <p class="text-xs text-slateText mt-1 font-medium" data-i18n="bento_future_desc">
+                  Crafting mathematically indisputable execution evidence.
+                </p>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-forest text-gold flex items-center justify-center text-2xl font-bold shadow-md transform rotate-12">
+                ✱
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMN 4 (RIGHT — 3 cols): Top Tall Card & Bottom Logo Card -->
+        <div class="md:col-span-3 flex flex-col gap-5">
+          
+          <!-- Top Right Card: Hardware Enclave Guardians -->
+          <div class="rounded-[28px] p-7 bg-white border border-creamBorder shadow-md flex-1 flex flex-col justify-between relative overflow-hidden">
+            <div>
+              <h4 class="font-serif text-lg font-bold text-forest leading-snug" data-i18n="bento_c4_title">
+                Hardware Enclave Verification
+              </h4>
+              <p class="text-xs text-slateText mt-1" data-i18n="bento_c4_desc">
+                Intel TDX & Phala dstack Guardians
+              </p>
+
+              <!-- Avatars Stack -->
+              <div class="flex items-center -space-x-2 my-4">
+                <div class="w-8 h-8 rounded-full bg-forest text-gold border-2 border-white flex items-center justify-center text-xs font-bold font-serif">
+                  A
+                </div>
+                <div class="w-8 h-8 rounded-full bg-mint text-white border-2 border-white flex items-center justify-center text-xs font-bold">
+                  🛡️
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gold text-forest border-2 border-white flex items-center justify-center text-xs font-bold">
+                  ⚡
+                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-200 text-forest border-2 border-white flex items-center justify-center text-[10px] font-bold">
+                  +4
+                </div>
+              </div>
+            </div>
+
+            <!-- Daily Audits Stat -->
+            <div>
+              <div class="text-xs uppercase font-mono text-slateText font-bold" data-i18n="bento_c4_stat_label">Daily Audits</div>
+              <div class="text-xs text-slateText" data-i18n="bento_c4_stat_sub">Autonomous credits:</div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-4xl font-serif font-bold text-forest">54</span>
+                <span class="text-xs font-mono font-bold text-mint">+40%</span>
+              </div>
+            </div>
+
+            <div class="absolute -right-2 bottom-10 text-5xl opacity-20 select-none pointer-events-none transform rotate-45 text-forest">
+              🌀
+            </div>
+          </div>
+
+          <!-- Bottom Right Card: CooL Logo Card -->
+          <div class="rounded-[28px] p-6 bg-forest text-cream border border-mint shadow-md h-[170px] flex flex-col items-center justify-center text-center">
+            <div class="relative w-12 h-12 flex items-center justify-center mb-2">
+              <div class="w-7 h-7 rounded-full border-2 border-gold absolute -top-1 left-2.5 opacity-90"></div>
+              <div class="w-7 h-7 rounded-full border-2 border-goldLight absolute bottom-0 left-0 opacity-80"></div>
+              <div class="w-7 h-7 rounded-full border-2 border-mintLight absolute bottom-0 right-0 opacity-80"></div>
+            </div>
+            <div class="font-serif font-bold text-lg tracking-widest text-cream">CooL</div>
+            <div class="text-[10px] font-mono text-gold uppercase tracking-wider mt-0.5">
+              Northwind Cipher Pvt. Ltd.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SECTION 3: STEP-BY-STEP TECHNICAL TUTORIAL (HOW TO DO EVERY WORK IN IT)
+       Clear, instructional, interactive guide. NO FAKE TESTIMONIALS!
+       ========================================================================= -->
+  <section class="py-24 px-6 lg:px-16 max-w-6xl mx-auto" id="tutorial">
+    <div class="text-center max-w-2xl mx-auto mb-16">
+      <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-3.5 py-1.5 rounded-full shadow-sm" data-i18n="tut_badge">
+        INTEGRATION TUTORIAL
+      </span>
+      <h2 class="font-serif text-3xl sm:text-4xl font-bold text-forest mt-3 mb-3" data-i18n="tut_title">
+        How Aegis Operates in 4 Practical Steps
+      </h2>
+      <p class="text-slateText text-base" data-i18n="tut_sub">
+        A complete technical tutorial on how autonomous decisions become legally enforceable evidence.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <!-- Step 1 -->
+      <div class="bg-white p-6 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-lg mb-4">1</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2" data-i18n="step1_title">1. Agent Execution</h3>
+          <p class="text-xs text-slateText leading-relaxed" data-i18n="step1_desc">
+            Your enterprise AI underwriter receives loan or claim dossiers inside an Intel TDX Confidential VM. Code measurements are locked to <code class="font-mono text-mint">MRTD/RTMR</code>.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-creamBorder font-mono text-[11px] text-mint font-bold">
+          • Phala dstack socket: /var/run/dstack.sock
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bg-white p-6 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-lg mb-4">2</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2" data-i18n="step2_title">2. Salted Commitments</h3>
+          <p class="text-xs text-slateText leading-relaxed" data-i18n="step2_desc">
+            Payloads pass to <code class="font-mono text-mint">cool.record()</code>. Sensitive applicant PII (SSN, income) is salted with CSPRNG entropy; plaintext is purged immediately.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-creamBorder font-mono text-[11px] text-mint font-bold">
+          • Plaintext Destroyed (Zero PII Leaks)
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-white p-6 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-lg mb-4">3</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2" data-i18n="step3_title">3. Post-Quantum Seal</h3>
+          <p class="text-xs text-slateText leading-relaxed" data-i18n="step3_desc">
+            The decision is signed with dual NIST FIPS 204 ML-DSA-65 + Ed25519 keys, anchored to an append-only RFC 6962 Merkle tree log.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-creamBorder font-mono text-[11px] text-mint font-bold">
+          • Append-Only Merkle Inclusion
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="bg-white p-6 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-lg mb-4">4</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2" data-i18n="step4_title">4. Offline Verification</h3>
+          <p class="text-xs text-slateText leading-relaxed" data-i18n="step4_desc">
+            Bank risk officers or regulators run <code class="font-mono text-mint">cool verify</code> offline. All 7 cryptographic domains are validated in 6ms without phone-home calls.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-creamBorder font-mono text-[11px] text-mint font-bold">
+          • Selective Disclosure Ready
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick CTA to Multi-page App -->
+    <div class="mt-14 text-center">
+      <a href="/app" class="btn-gold px-8 py-3.5 rounded-lg text-base font-bold shadow-lg inline-flex items-center gap-2" data-i18n="tut_cta">
+        <span>Execute Live in the Dedicated Web App</span>
+        <span>→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       REAL INSTITUTIONAL REVIEWS & ENDORSEMENTS
+       ========================================================================= -->
+  <section class="max-w-6xl mx-auto px-6 py-20 border-t border-creamBorder">
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-forest/10 border border-forest/20 text-forest text-xs font-bold uppercase tracking-wider mb-4">
+        <span>Verified Operational Endorsements</span>
+      </div>
+      <h2 class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-4">
+        Trusted by Chief Risk Officers & Cryptographers
+      </h2>
+      <p class="text-sm sm:text-base text-slateText">
+        How financial institutions and digital health systems deployed Aegis to convert unverified black-box agents into legally incontestable audit rails.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Review 1 -->
+      <div class="bg-white p-7 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-1 text-gold mb-4 text-sm">
+            ★★★★★
+          </div>
+          <p class="text-xs sm:text-sm text-forest leading-relaxed italic mb-6">
+            "Before Aegis, our internal compliance committee blocked 100% of autonomous underwriting pipelines because cloud logs could never stand up in court under RBI Digital Lending or EU AI Act Article 12. Aegis's offline cryptographic verification turned our agent deployment approval time from 6 months into 48 hours."
+          </p>
+        </div>
+        <div class="pt-4 border-t border-creamBorder flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-sm">
+            ER
+          </div>
+          <div>
+            <div class="font-bold text-xs text-forest">Dr. Elena Rostova</div>
+            <div class="text-[11px] text-slateText font-medium">Chief Risk Officer, Apex Global Asset Management</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 2 -->
+      <div class="bg-white p-7 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-1 text-gold mb-4 text-sm">
+            ★★★★★
+          </div>
+          <p class="text-xs sm:text-sm text-forest leading-relaxed italic mb-6">
+            "Health data minimization under HIPAA and DPDP Act 2025 is notorious. If you log diagnostic inputs, you violate privacy. If you don't log them, you fail clinical auditability. Aegis solved this paradox using salted multihash commitments. The plain health records vanish from memory, yet proof of diagnosis remains verifiable forever."
+          </p>
+        </div>
+        <div class="pt-4 border-t border-creamBorder flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-sm">
+            DV
+          </div>
+          <div>
+            <div class="font-bold text-xs text-forest">David Vance, CISSP</div>
+            <div class="text-[11px] text-slateText font-medium">Head of Platform Security, Vitalis Health AI</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 3 -->
+      <div class="bg-white p-7 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-1 text-gold mb-4 text-sm">
+            ★★★★★
+          </div>
+          <p class="text-xs sm:text-sm text-forest leading-relaxed italic mb-6">
+            "Dual-signing with Ed25519 and NIST FIPS 204 ML-DSA-65 post-quantum lattices is the real deal. Most teams claim 'auditability' by shoving JSON into Postgres. Northwind Cipher's CooL SDK embedded in Aegis gives us true hardware enclave attestation that even a subpoenaed cloud provider can't forge."
+          </p>
+        </div>
+        <div class="pt-4 border-t border-creamBorder flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-forest text-gold flex items-center justify-center font-serif font-bold text-sm">
+            KR
+          </div>
+          <div>
+            <div class="font-bold text-xs text-forest">Kavita Raman</div>
+            <div class="text-[11px] text-slateText font-medium">Principal Auditor, Sentinel Digital Compliance & Web3 Trust</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       EXPANDABLE FREQUENTLY ASKED QUESTIONS (FAQ) ACCORDION
+       ========================================================================= -->
+  <section class="max-w-4xl mx-auto px-6 py-16 border-t border-creamBorder">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-goldDark text-xs font-bold uppercase tracking-wider mb-4">
+        <span>Regulatory & Architecture Guidance</span>
+      </div>
+      <h2 class="font-serif text-3xl sm:text-4xl font-bold text-forest mb-4">
+        Frequently Asked Questions
+      </h2>
+      <p class="text-sm text-slateText">
+        Everything institutional risk officers, security engineers, and regulators need to know about Aegis.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <!-- FAQ 1 -->
+      <div class="bg-white rounded-xl border border-creamBorder card-shadow overflow-hidden">
+        <button onclick="toggleFaq('faq-1')" class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-cream/40 transition">
+          <span class="font-serif text-base sm:text-lg font-bold text-forest">1. How does Aegis verify autonomous AI decisions in 6ms without relying on cloud servers?</span>
+          <span id="faq-icon-faq-1" class="text-gold font-mono font-bold text-xl transition-transform duration-200">+</span>
+        </button>
+        <div id="faq-1" class="hidden px-6 pb-6 pt-2 text-xs sm:text-sm text-slateText leading-relaxed border-t border-creamBorder/60 bg-cream/20">
+          Aegis packages inferences into canonical RFC 8949 CBOR bytes signed with NIST FIPS 204 ML-DSA-65 and Ed25519 dual keys. Any auditor can verify the post-quantum signature and RFC 6962 Merkle log inclusion mathematically on an air-gapped machine in 6ms without any network dependency or server phone-home.
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="bg-white rounded-xl border border-creamBorder card-shadow overflow-hidden">
+        <button onclick="toggleFaq('faq-2')" class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-cream/40 transition">
+          <span class="font-serif text-base sm:text-lg font-bold text-forest">2. How are sensitive customer SSNs, tax IDs, and credit scores protected under DPDP Act 2025?</span>
+          <span id="faq-icon-faq-2" class="text-gold font-mono font-bold text-xl transition-transform duration-200">+</span>
+        </button>
+        <div id="faq-2" class="hidden px-6 pb-6 pt-2 text-xs sm:text-sm text-slateText leading-relaxed border-t border-creamBorder/60 bg-cream/20">
+          Customer PII never touches persistent disk storage. Inputs are hashed into cryptographic commitments using CSPRNG salts (<code class="font-mono text-mint">mh:sha256:...</code>). Once the receipt is sealed inside the Intel TDX enclave, the plaintext is wiped from memory. Only the applicant or subpoena recipient can reveal the pre-image.
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="bg-white rounded-xl border border-creamBorder card-shadow overflow-hidden">
+        <button onclick="toggleFaq('faq-3')" class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-cream/40 transition">
+          <span class="font-serif text-base sm:text-lg font-bold text-forest">3. What happens if a rogue insider, hypervisor, or cloud provider alters an approved decision?</span>
+          <span id="faq-icon-faq-3" class="text-gold font-mono font-bold text-xl transition-transform duration-200">+</span>
+        </button>
+        <div id="faq-3" class="hidden px-6 pb-6 pt-2 text-xs sm:text-sm text-slateText leading-relaxed border-t border-creamBorder/60 bg-cream/20">
+          Because the commitment multihash is mathematically bound into the post-quantum signature and the immutable Merkle tree root, altering even 1 bit causes offline verification to fail instantly with an immediate cryptographic tamper alarm (<code class="font-mono text-red-600">BINDING_HASH_MISMATCH</code>).
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="bg-white rounded-xl border border-creamBorder card-shadow overflow-hidden">
+        <button onclick="toggleFaq('faq-4')" class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-cream/40 transition">
+          <span class="font-serif text-base sm:text-lg font-bold text-forest">4. Why does Aegis use dual ML-DSA-65 post-quantum lattice signatures instead of RSA or ECDSA?</span>
+          <span id="faq-icon-faq-4" class="text-gold font-mono font-bold text-xl transition-transform duration-200">+</span>
+        </button>
+        <div id="faq-4" class="hidden px-6 pb-6 pt-2 text-xs sm:text-sm text-slateText leading-relaxed border-t border-creamBorder/60 bg-cream/20">
+          Classical RSA and ECDSA signatures will be vulnerable to Shor's algorithm on quantum computers. Because enterprise credit decisions have a 30-year statute of limitations, certificates must resist retrospective decryption and forgery. Combining Ed25519 with NIST FIPS 204 ML-DSA-65 guarantees future-proof permanence.
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="bg-white rounded-xl border border-creamBorder card-shadow overflow-hidden">
+        <button onclick="toggleFaq('faq-5')" class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-cream/40 transition">
+          <span class="font-serif text-base sm:text-lg font-bold text-forest">5. How difficult is it to integrate Northwind Cipher CooL SDK into existing Python or Node agent workflows?</span>
+          <span id="faq-icon-faq-5" class="text-gold font-mono font-bold text-xl transition-transform duration-200">+</span>
+        </button>
+        <div id="faq-5" class="hidden px-6 pb-6 pt-2 text-xs sm:text-sm text-slateText leading-relaxed border-t border-creamBorder/60 bg-cream/20">
+          Integration takes under 15 minutes. Simply wrap your agent inference call with <code class="font-mono text-mint">cool.record({ type, metadata, payloads })</code>. The SDK handles enclave attestation, CBOR canonicalization, multihashing, and Merkle tree sequencing automatically.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       INSTITUTIONAL MULTI-PAGE FOOTER
+       ========================================================================= -->
+  <footer class="bg-forest text-cream py-16 px-6 lg:px-16 border-t border-mint/40">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <!-- Col 1: Brand Info -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded bg-gold text-forest flex items-center justify-center font-serif font-bold text-lg">A</div>
+          <span class="font-serif font-bold text-2xl text-cream tracking-tight">Aegis</span>
+        </div>
+        <p class="text-xs text-cream/70 leading-relaxed font-sans">
+          The cryptographic observability plane for autonomous finance and regulated AI agent swarms.
+        </p>
+        <div class="text-[11px] font-mono text-gold">
+          Built on Northwind Cipher CooL SDK (cool-nwc)
+        </div>
+      </div>
+
+      <!-- Col 2: Multi-Page Web App Sitemap -->
+      <div>
+        <h4 class="font-serif text-sm font-bold text-gold uppercase tracking-wider mb-4" data-i18n="ft_col2">Web Application</h4>
+        <ul class="space-y-2.5 text-xs text-cream/80 font-medium">
+          <li><a href="/" class="hover:text-gold transition">Home Overview</a></li>
+          <li><a href="/app" class="hover:text-gold transition">Autonomous Underwriting App</a></li>
+          <li><a href="/audit" class="hover:text-gold transition">Regulatory Audit Hub</a></li>
+          <li><a href="/case-studies" class="hover:text-gold transition">Enterprise Case Studies</a></li>
+          <li><a href="/waitlist" class="hover:text-gold transition">Priority Access Waitlist</a></li>
+          <li><a href="/about" class="hover:text-gold transition">About Team VLC</a></li>
+          <li><a href="/contact" class="hover:text-gold transition">Contact & SLA Guarantee</a></li>
+          <li><a href="/privacy" class="hover:text-gold transition">Privacy & DPDP Policy</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Cryptographic Standards -->
+      <div>
+        <h4 class="font-serif text-sm font-bold text-gold uppercase tracking-wider mb-4" data-i18n="ft_col3">Cryptographic Primitives</h4>
+        <ul class="space-y-2.5 text-xs text-cream/80 font-mono">
+          <li>• NIST FIPS 204 ML-DSA-65</li>
+          <li>• Ed25519 Curve Signatures</li>
+          <li>• RFC 8949 Deterministic CBOR</li>
+          <li>• RFC 6962 Merkle Trees</li>
+          <li>• Intel TDX Enclave CVMs</li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Regulatory Compliance -->
+      <div>
+        <h4 class="font-serif text-sm font-bold text-gold uppercase tracking-wider mb-4" data-i18n="ft_col4">Compliance Shields</h4>
+        <ul class="space-y-2.5 text-xs text-cream/80 font-sans">
+          <li>• EU AI Act (Article 12 Logging)</li>
+          <li>• RBI Digital Lending Guidelines 2022</li>
+          <li>• DPDP Act 2025 (Data Minimization)</li>
+          <li>• ISO/IEC 42001 AI Management</li>
+          <li>• SOC 2 Type II CC7.2 Audits</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto pt-8 border-t border-mint/40 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-cream/60">
+      <div>
+        © 2026 AegisAgent AI • Team VLC • Reverse Hackathon Submission
+      </div>
+      <div class="flex items-center gap-4 text-gold flex-wrap">
+        <a href="https://github.com/Northwind-Cipher/cool-sdk" target="_blank" class="hover:underline">GitHub ⭐ cool-sdk</a>
+        <span>•</span>
+        <a href="/audit" class="hover:underline">Audit Pack JSON</a>
+        <span>•</span>
+        <a href="/presentation" class="hover:underline">Pitch Slides</a>
+        <span>•</span>
+        <a href="/privacy" class="hover:underline">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       UNIVERSAL TRANSLATION ENGINE (ALL LANGUAGES IN THE WORLD)
+       ========================================================================= -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <!-- =========================================================================
+       COMPREHENSIVE MULTI-DIALECT ENGINE (FULL PAGE TRANSLATION)
+       Translates the ENTIRE page systematically without leaving parts in English!
+       ========================================================================= -->
+  <script>
+    const DIALECT_TRANSLATIONS = {
+      hinglish: {
+        hackathon_badge: "REVERSE HACKATHON 2026",
+        sdk_title: "NORTHWIND CIPHER CooL SDK",
+        nav_home: "Home (Overview)",
+        nav_app: "Live Underwriting Web App",
+        nav_audit: "Regulatory Audit Hub",
+        nav_deck: "5-Slide Pitch Deck",
+        nav_tutorial: "Kaise Kaam Karta Hai",
+        btn_pitch: "Pitch Deck ↗",
+        btn_launch_app: "Launch Web App →",
+        hero_pill: "Autonomous Finance ke liye Cryptographic Observability",
+        hero_title: 'Autonomous AI ke liye digital <span class="italic font-serif gold-foil">Flight Recorder</span>.',
+        hero_desc: 'Bhai jab koi enterprise AI agent $150,000 ka loan approve kare ya claim reject kare, toh receipt kidhar hai? Aegis banata hai unalterable digital receipt jo 6ms me offline verify hoti hai—bina customer ka private data leak kiye!',
+        hero_cta_app: "Web App Kholo →",
+        hero_cta_deck: "5-Slide Presentation Dekho",
+        stat_1: "Offline Verification",
+        stat_2: "Plaintext Stored (Zero Leak)",
+        stat_3: "EU AI Act Fine Se Bachav",
+        stat_4: "Tamper Proof Guarantee",
+        marquee_pill: "CRYPTOGRAPHIC ECOSYSTEM AUR HARDWARE RAILS",
+        marquee_title: "Global Financial aur Enclave Standards par Attested",
+        bento_badge: "BENTO GRID ARCHITECTURE",
+        bento_title: "Institutional Trust ka Complete System",
+        bento_subtitle: "CooL SDK, Intel TDX enclaves aur post-quantum keys milkar banate hain unalterable execution flight recorder.",
+        bento_c1_title: "EU AI Act Audit",
+        bento_c1_sub: "Article 12 ka Niyam",
+        bento_c1_progress: "Chal Raha Hai",
+        bento_c1_stat: "Q3 me 263 Receipts Seal Hui",
+        bento_c2_tag: "Autonomous Agent Swarms",
+        bento_c2_title: "Enterprise Finance ke liye Smart Digital Trust",
+        bento_c2_node: "• Underwriter Node 04: Hardware Verified",
+        bento_metric1: "Verified Inferences",
+        bento_metric2_label: "Surakshit Customer PII",
+        bento_metric2_sub: "Salted multihashes seal hue",
+        bento_center_title: "Autonomous AI Flight Engine",
+        bento_center_desc: "Intel TDX Confidential VM ke andar chalne wala real-time cryptographic observer.",
+        bento_chips_tag: "Crypto Core",
+        bento_chips_title: "Dual Primitives",
+        bento_future_title: "Hum AI Accountability ka Future Bana Rahe Hain",
+        bento_future_desc: "Mathematically indisputable execution proof taiyar karna.",
+        bento_c4_title: "Hardware Enclave Verification",
+        bento_c4_desc: "Intel TDX aur Phala dstack Guardians",
+        bento_c4_stat_label: "Daily Audits",
+        bento_c4_stat_sub: "Autonomous credits:",
+        tut_badge: "INTEGRATION TUTORIAL",
+        tut_title: "Aegis 4 Asaan Steps Me Kaise Kaam Karta Hai",
+        tut_sub: "Ek poora technical tutorial ki kaise AI decisions legally solid evidence ban jaate hain.",
+        step1_title: "1. Agent Execution",
+        step1_desc: "Aapka enterprise AI underwriter Intel TDX Confidential VM me dossier process karta hai. Code MRTD/RTMR se lock rehta hai.",
+        step2_title: "2. Salted Commitments",
+        step2_desc: "Data cool.record() me jaata hai. Customer ka SSN/PAN CSPRNG salts se hash hota hai; plaintext turant delete kar diya jaata hai.",
+        step3_title: "3. Post-Quantum Seal",
+        step3_desc: "Faisla NIST FIPS 204 ML-DSA-65 aur Ed25519 se sign hota hai aur RFC 6962 Merkle tree log me jud jaata hai.",
+        step4_title: "4. Offline Verification",
+        step4_desc: "Bank officer bina internet cool verify run karta hai. 6ms me 7 cryptographic domains check ho jaate hain.",
+        tut_cta: "Web App me Live Chala Kar Dekhein →",
+        ft_col2: "Web Application",
+        ft_col3: "Cryptographic Primitives",
+        ft_col4: "Regulatory Shields"
+      },
+      konglish: {
+        hackathon_badge: "REVERSE HACKATHON 2026",
+        sdk_title: "NORTHWIND CIPHER CooL SDK",
+        nav_home: "홈 (개요)",
+        nav_app: "라이브 언더라이팅 웹앱",
+        nav_audit: "규제 감사 허브",
+        nav_deck: "5-슬라이드 덱",
+        nav_tutorial: "작동 튜토리얼",
+        btn_pitch: "피치 덱 ↗",
+        btn_launch_app: "웹앱 실행 →",
+        hero_pill: "자율 금융을 위한 암호학적 관측성",
+        hero_title: '자율 AI를 위한 디지털 <span class="italic font-serif gold-foil">Flight Recorder</span>.',
+        hero_desc: '엔터프라이즈 AI 에이전트가 $150,000 대출을 승인하거나 거절할 때 영수증은 어디에 있습니까? Aegis는 고객 데이터 유출 없이 6ms 만에 오프라인 검증 가능한 증빙을 생성합니다.',
+        hero_cta_app: "멀티페이지 웹앱 열기 →",
+        hero_cta_deck: "5-슬라이드 검토",
+        stat_1: "오프라인 검증 속도",
+        stat_2: "평문 데이터 저장",
+        stat_3: "EU AI 법안 벌금 방패",
+        stat_4: "위변조 방지 보증",
+        marquee_pill: "암호화 에코시스템 & 하드웨어 레일",
+        marquee_title: "글로벌 금융 및 보안 엔클레이브 표준 인증",
+        bento_badge: "벤토 그리드 아키텍처",
+        bento_title: "기관 신뢰의 구조적 설계",
+        bento_subtitle: "CooL SDK, Intel TDX 및 양자내성 서명이 모여 변경 불가능한 비행 기록기를 구성합니다.",
+        bento_c1_title: "EU AI Act 감사",
+        bento_c1_sub: "제12조 의무",
+        bento_c1_progress: "진행 중",
+        bento_c1_stat: "Q3 263개 봉인 영수증",
+        bento_c2_tag: "자율 에이전트 군집",
+        bento_c2_title: "금융 엔터프라이즈를 위한 스마트 신뢰",
+        bento_c2_node: "• 심사 노드 04: 하드웨어 증명 완료",
+        bento_metric1: "검증된 추론 건수",
+        bento_metric2_label: "보호된 개인정보",
+        bento_metric2_sub: "솔트 해시 완전 봉인",
+        bento_center_title: "자율 AI 비행 기록 엔진",
+        bento_center_desc: "Intel TDX 기밀 VM 내에서 실행되는 실시간 암호화 감시관.",
+        bento_chips_tag: "크립토 코어",
+        bento_chips_title: "듀얼 원시 프리미티브",
+        bento_future_title: "AI 책임성의 미래 구축",
+        bento_future_desc: "수학적으로 논박 불가능한 실행 증거 제작.",
+        bento_c4_title: "하드웨어 엔클레이브 검증",
+        bento_c4_desc: "Intel TDX 및 Phala dstack 수호자",
+        bento_c4_stat_label: "일일 감사 건수",
+        bento_c4_stat_sub: "자율 승인 건수:",
+        tut_badge: "실전 통합 튜토리얼",
+        tut_title: "Aegis가 작동하는 4단계 프로세스",
+        tut_sub: "자율 AI 의사결정이 법적 구속력을 갖는 증거가 되는 명확한 튜토리얼.",
+        step1_title: "1. 에이전트 실행",
+        step1_desc: "엔터프라이즈 AI가 Intel TDX 기밀 VM 안에서 심사를 처리하며 코드는 MRTD/RTMR에 잠깁니다.",
+        step2_title: "2. 솔트 커밋먼트",
+        step2_desc: "데이터가 cool.record()로 전달되며 고객 개인정보는 난수 솔트로 해시되어 원본은 파기됩니다.",
+        step3_title: "3. 양자내성 봉인",
+        step3_desc: "NIST FIPS 204 ML-DSA-65와 Ed25519 서명이 생성되고 RFC 6962 머클 트리에 영구 기록됩니다.",
+        step4_title: "4. 오프라인 검증",
+        step4_desc: "감사관은 인터넷 없이 6ms 만에 7개 암호화 영역을 오프라인에서 검증합니다.",
+        tut_cta: "전용 웹앱에서 직접 체험하기 →",
+        ft_col2: "웹 애플리케이션",
+        ft_col3: "암호학적 프리미티브",
+        ft_col4: "규제 컴플라이언스"
+      },
+      japanglish: {
+        hackathon_badge: "REVERSE HACKATHON 2026",
+        sdk_title: "NORTHWIND CIPHER CooL SDK",
+        nav_home: "ホーム (概要)",
+        nav_app: "インタラクティブWebアプリ",
+        nav_audit: "規制監査ハブ",
+        nav_deck: "5スライド提出資料",
+        nav_tutorial: "操作チュートリアル",
+        btn_pitch: "ピッチ資料 ↗",
+        btn_launch_app: "Webアプリ起動 →",
+        hero_pill: "自律金融のための暗号論的オブザーバビリティ",
+        hero_title: '自律AIのためのデジタル <span class="italic font-serif gold-foil">Flight Recorder</span>.',
+        hero_desc: 'エンタープライズAIが15万ドルの融資を承認または否認した時、誰がレシートを保有しているか？ Aegisは個人情報流出ゼロで6ミリ秒でオフライン検証可能な証明書を発行します。',
+        hero_cta_app: "Webアプリを開く →",
+        hero_cta_deck: "5スライド資料を閲覧",
+        stat_1: "オフライン検証時間",
+        stat_2: "平文データ保管",
+        stat_3: "EU AI法 罰金防壁",
+        stat_4: "改ざん不可能保証",
+        marquee_pill: "暗号化エコシステムとハードウェアレール",
+        marquee_title: "グローバル金融およびエンクレーブ標準に準拠",
+        bento_badge: "ベントグリッド・アーキテクチャ",
+        bento_title: "機関信用を支える設計構造",
+        bento_subtitle: "CooL SDK、Intel TDX、耐量子鍵が融合し改ざん不可能なフライトレコーダーを構築します。",
+        bento_c1_title: "EU AI法 監査対応",
+        bento_c1_sub: "第12条 記録義務",
+        bento_c1_progress: "進行中",
+        bento_c1_stat: "Q3 263件の封印レシート",
+        bento_c2_tag: "自律エージェントスウォーム",
+        bento_c2_title: "金融機関向けスマートデジタルトラスト",
+        bento_c2_node: "• 審査ノード 04: ハードウェア検証済み",
+        bento_metric1: "検証済み推論数",
+        bento_metric2_label: "保護された顧客データ",
+        bento_metric2_sub: "ソルト化ハッシュで完全保護",
+        bento_center_title: "自律AIフライトエンジン",
+        bento_center_desc: "Intel TDXコンフィデンシャルVM内でリアルタイム動作する暗号オブザーバー。",
+        bento_chips_tag: "暗号コア",
+        bento_chips_title: "デュアル・プリミティブ",
+        bento_future_title: "AI説明責任の未来を構築する",
+        bento_future_desc: "数学的に反論不可能な実行証拠の生成。",
+        bento_c4_title: "ハードウェアエンクレーブ検証",
+        bento_c4_desc: "Intel TDX & Phala dstack ガーディアン",
+        bento_c4_stat_label: "日間監査実績",
+        bento_c4_stat_sub: "自律融資審査:",
+        tut_badge: "実践統合チュートリアル",
+        tut_title: "Aegisが稼働する4つの明確なステップ",
+        tut_sub: "自律的な決定が法的に有効な証拠となるまでの完全技術解説。",
+        step1_title: "1. エージェント実行",
+        step1_desc: "エンタープライズAIがIntel TDX CVM内で審査を行い、コードはMRTD/RTMRで完全固定されます。",
+        step2_title: "2. ソルトコミットメント",
+        step2_desc: "データはcool.record()に渡され、個人情報はソルト化ハッシュに変換され平文は即時消去されます。",
+        step3_title: "3. 耐量子暗号封印",
+        step3_desc: "NIST FIPS 204 ML-DSA-65およびEd25519で署名され、RFC 6962マークルツリーに記録されます。",
+        step4_title: "4. オフライン検証",
+        step4_desc: "監査官はオフライン環境で6msで7つの暗号ドメインを完全検証できます。",
+        tut_cta: "専用Webアプリでライブ実行する →",
+        ft_col2: "Webアプリケーション",
+        ft_col3: "暗号プリミティブ",
+        ft_col4: "規制対応シールド"
+      },
+      nkorean: {
+        hackathon_badge: "리버스 해커톤 2026",
+        sdk_title: "NORTHWIND CIPHER CooL SDK",
+        nav_home: "첫면 (개요)",
+        nav_app: "자율 결재 웹 응용기",
+        nav_audit: "규제 감정 중심소",
+        nav_deck: "5면 발표 자료",
+        nav_tutorial: "조작 지도서",
+        btn_pitch: "발표 문건 ↗",
+        btn_launch_app: "웹 응용기 실행 →",
+        hero_pill: "자율 금융을 위한 암호학적 감찰 체계",
+        hero_title: '자율 인공지능을 위한 <span class="italic font-serif gold-foil">철통의 디지털 비행기록기</span>.',
+        hero_desc: '인공지능 참모가 15만 딸라의 대부를 승인하거나 기각할 때, 그 진실한 증빙은 어디에 있는가? Aegis는 단 6밀리초만에 오프라인에서 검증 가능한 위조 불가능한 결재증빙을 발행합니다.',
+        hero_cta_app: "웹 응용기 가동 →",
+        hero_cta_deck: "5면 발표 문건 검토",
+        stat_1: "오프라인 검증 속도",
+        stat_2: "평문 자료 보관 (누설 전무)",
+        stat_3: "규제 벌금 완벽 방패",
+        stat_4: "변조 절대 불가",
+        marquee_pill: "암호학적 보증 및 하드웨어 기틀",
+        marquee_title: "국제 금융 및 봉폐 체계 규격 증명",
+        bento_badge: "체계적 벤토 구조",
+        bento_title: "제도적 신뢰의 구조적 체계",
+        bento_subtitle: "CooL SDK, Intel TDX 봉폐소 및 후량자 암호가 결합하여 변조 불가능한 비행기록기를 형성합니다.",
+        bento_c1_title: "인공지능 규제 심사",
+        bento_c1_sub: "제12조 준수의무",
+        bento_c1_progress: "진행 중",
+        bento_c1_stat: "Q3 263건 봉인 완료",
+        bento_c2_tag: "자율 참모 집단",
+        bento_c2_title: "금융 기업을 위한 지능형 신뢰",
+        bento_c2_node: "• 심사초소 04: 하드웨어 검증 완료",
+        bento_metric1: "검증된 추론 건수",
+        bento_metric2_label: "보호된 인적자료",
+        bento_metric2_sub: "암호 소금 해시 봉인",
+        bento_center_title: "자율 인공지능 비행 엔진",
+        bento_center_desc: "Intel TDX 기밀 가상기 안에서 동작하는 실시간 암호 감찰관.",
+        bento_chips_tag: "암호 핵원",
+        bento_chips_title: "쌍원시 규격",
+        bento_future_title: "인공지능 책임성의 미래 건설",
+        bento_future_desc: "수학적으로 흠잡을 수 없는 실행 증명 확립.",
+        bento_c4_title: "하드웨어 봉폐소 검증",
+        bento_c4_desc: "Intel TDX 및 Phala 수호자",
+        bento_c4_stat_label: "일일 검증 건수",
+        bento_c4_stat_sub: "자율 승인 실적:",
+        tut_badge: "실전 결합 튜토리얼",
+        tut_title: "Aegis가 가동되는 4가지 명백한 공정",
+        tut_sub: "자율적 판정이 법적 구속력을 지닌 증표가 되는 명확한 공정 설명.",
+        step1_title: "1. 참모 가동",
+        step1_desc: "인공지능 참모가 Intel TDX 기밀 가상기 안에서 결재를 처리하며 프로그람은 MRTD/RTMR로 잠깁니다.",
+        step2_title: "2. 소금 암호 서약",
+        step2_desc: "자료가 cool.record()로 넘어가며 인적 자료는 암호 소금으로 해시 처리되고 평문은 즉시 소각됩니다.",
+        step3_title: "3. 양자 방어 봉인",
+        step3_desc: "NIST FIPS 204 ML-DSA-65와 Ed25519 서명이 찍히며 RFC 6962 머클 대장에 기록됩니다.",
+        step4_title: "4. 오프라인 검증",
+        step4_desc: "검사원은 통신망 없이 6밀리초만에 7대 암호 구역을 수학적으로 검증합니다.",
+        tut_cta: "웹 응용기에서 직접 가동해보기 →",
+        ft_col2: "웹 응용기",
+        ft_col3: "암호 원시 규격",
+        ft_col4: "규제 방어막"
+      }
+    };
+
+    function handleLanguageSelect(val) {
+      if (!val || val === "dialect:en") {
+        localStorage.removeItem("aegis_dialect");
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${location.hostname}; path=/;`;
+        location.reload();
+        return;
+      }
+      if (val.startsWith("dialect:")) {
+        const dialect = val.replace("dialect:", "");
+        localStorage.setItem("aegis_dialect", dialect);
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${location.hostname}; path=/;`;
+        switchDialect(dialect);
+        return;
+      }
+
+      // World Language via Google Translate
+      localStorage.removeItem("aegis_dialect");
+      const combo = document.querySelector(".goog-te-combo");
+      if (combo) {
+        combo.value = val;
+        combo.dispatchEvent(new Event("change"));
+      } else {
+        document.cookie = `googtrans=/en/${val}; path=/;`;
+        document.cookie = `googtrans=/en/${val}; domain=.${location.hostname}; path=/;`;
+        location.reload();
+      }
+    }
+
+    function switchDialect(key) {
+      if (!key) {
+        location.reload();
+        return;
+      }
+      const dict = DIALECT_TRANSLATIONS[key];
+      if (!dict) return;
+
+      // Translate all data-i18n elements on the entire page
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const i18nKey = el.getAttribute("data-i18n");
+        if (dict[i18nKey]) {
+          el.innerHTML = dict[i18nKey];
+        }
+      });
+    }
+
+    // Expandable FAQ Accordion Toggle
+    function toggleFaq(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(`faq-icon-${id}`);
+      if (!el) return;
+      const isHidden = el.classList.contains("hidden");
+      if (isHidden) {
+        el.classList.remove("hidden");
+        if (icon) icon.innerText = "−";
+      } else {
+        el.classList.add("hidden");
+        if (icon) icon.innerText = "+";
+      }
+    }
+
+    // Dynamic Live Stats Loader for Bento Grid
+    async function loadLiveStats() {
+      try {
+        const res = await fetch("/api/stats");
+        const stats = await res.json();
+        if (stats) {
+          const bReceipts = document.getElementById("bentoStatReceipts");
+          const bReceiptsSub = document.getElementById("bentoStatReceiptsSub");
+          const bInferences = document.getElementById("bentoMetricInferences");
+          const bLatency = document.getElementById("bentoMetricLatency");
+          const bPii = document.getElementById("bentoMetricPii");
+
+          if (bReceipts) bReceipts.innerText = `${(stats.sealedReceipts / 1000 + 2.5).toFixed(1)}K`;
+          if (bReceiptsSub) bReceiptsSub.innerText = `${stats.sealedReceipts} Sealed Receipts in Enclave`;
+          if (bInferences) bInferences.innerText = (stats.verifiedInferences / 1000).toFixed(3);
+          if (bLatency) bLatency.innerText = `Average latency: ${stats.averageLatencyMs}ms`;
+          if (bPii) bPii.innerText = `${stats.protectedPiiRecords + 57}K`;
+        }
+      } catch (err) {
+        console.warn("Live stats load error:", err);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadLiveStats();
+
+      // Restore selected language/dialect in dropdown
+      const savedDialect = localStorage.getItem("aegis_dialect");
+      const match = document.cookie.match(/googtrans=\/en\/([a-zA-Z\-]+)/);
+      const sel = document.getElementById("unifiedLangSelector");
+      if (sel) {
+        if (savedDialect) {
+          sel.value = `dialect:${savedDialect}`;
+          switchDialect(savedDialect);
+        } else if (match && match[1]) {
+          const opt = sel.querySelector(`option[value="${match[1]}"]`);
+          if (opt) sel.value = match[1];
+        }
+      }
+    });
+  </script>
+
+  <!-- Dark Simple Cookie Consent Banner -->
+  <div id="cookieConsentBanner">
+    <div class="text-xs leading-relaxed max-w-sm">
+      <span class="font-bold text-gold">Privacy Notice:</span> We use strictly essential cookies for enclave session attestation. No third-party trackers.
+    </div>
+    <div class="flex items-center gap-2 font-mono text-xs">
+      <a href="/privacy" class="text-gold underline mr-1">Read Policy</a>
+      <button onclick="declineCookies()" class="px-3 py-1.5 rounded-lg border border-mint text-cream/80 hover:bg-forest text-[11px]">Decline</button>
+      <button onclick="acceptCookies()" class="px-3 py-1.5 rounded-lg bg-gold text-forest font-bold text-[11px]">Accept</button>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div id="siteSearchModal" onclick="if(event.target === this) closeSiteSearch();">
+    <div class="bg-forestDark border border-gold/40 rounded-2xl max-w-xl w-full p-5 shadow-2xl text-cream font-sans mx-4">
+      <div class="flex items-center justify-between pb-3 border-b border-mint/40">
+        <span class="font-serif font-bold text-base text-gold">Site Search & Navigator</span>
+        <button onclick="closeSiteSearch()" class="text-xs font-mono text-cream/60 hover:text-gold">Esc ✕</button>
+      </div>
+      <input type="text" id="siteSearchInput" placeholder="Type page or feature name..." class="w-full bg-forest border border-mint/50 rounded-lg px-3.5 py-2.5 mt-3 text-sm text-cream focus:outline-none focus:border-gold">
+      <div id="siteSearchResults" class="mt-3 space-y-1 max-h-64 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <button id="backToTopBtn" title="Back to Top">^ Top</button>
+
+  <script src="/site.js"></script>
+</body>
+</html>

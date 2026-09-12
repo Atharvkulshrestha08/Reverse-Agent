@@ -1,0 +1,13 @@
+{
+  "name": "aegis-agent",
+  "version": "1.0.0",
+  "description": "AegisAgent AI: Zero-Knowledge Cryptographic Observability Plane for Regulated Autonomous AI Agents",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cool-nwc": "file:../cool-sdk"
+  }
+}

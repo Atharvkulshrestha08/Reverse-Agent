@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Received — Priority Access Reserved | Aegis</title>
+  <meta name="description" content="Thank you for joining the Aegis institutional attestation waitlist. Your priority queue slot has been cryptographically reserved.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#0D2E27',
+            forestDark: '#071C17',
+            mint: '#1F4E43',
+            cream: '#F7F5F0',
+            gold: '#D4AF37',
+            goldLight: '#F5E6B3',
+            slateText: '#4A5568',
+            creamBorder: '#E7E2D6'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body class="min-h-screen flex flex-col bg-cream text-forest selection:bg-gold selection:text-white">
+  <div id="scrollProgressBar"></div>
+  <a href="#mainContent" class="skip-to-content">Skip to main content</a>
+
+  <!-- Header with Oval Navigation -->
+  <header class="bg-cream/95 backdrop-blur-md sticky top-0 z-50 border-b border-creamBorder px-6 lg:px-16 py-3.5 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <a href="/" class="w-10 h-10 rounded-lg bg-forest flex items-center justify-center text-gold text-xl font-serif font-bold shadow-md">
+        A
+      </a>
+      <div>
+        <a href="/" class="font-serif font-bold text-2xl tracking-tight text-forest block">Aegis</a>
+        <span class="text-[10px] uppercase tracking-widest font-mono text-mint font-semibold">Autonomous Observability</span>
+      </div>
+    </div>
+
+    <!-- Oval Bubble Navigation -->
+    <nav class="hidden lg:flex items-center gap-2">
+      <a href="/" class="nav-oval-bubble">Home</a>
+      <a href="/app" class="nav-oval-bubble">Interactive App</a>
+      <a href="/audit" class="nav-oval-bubble">Audit Hub</a>
+      <a href="/case-studies" class="nav-oval-bubble">Case Studies</a>
+      <a href="/waitlist" class="nav-oval-bubble">Waitlist</a>
+      <a href="/about" class="nav-oval-bubble">About</a>
+      <a href="/contact" class="nav-oval-bubble">Contact</a>
+      <a href="/presentation" class="nav-oval-bubble">Pitch Deck</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button onclick="openSiteSearch()" class="px-3.5 py-1.5 rounded-full border border-creamBorder bg-white text-xs font-mono font-bold text-slateText hover:border-gold hover:text-forest transition flex items-center gap-1.5 shadow-sm">
+        <span>🔍 Search</span>
+        <kbd class="px-1.5 py-0.5 text-[10px] bg-cream rounded border border-creamBorder">Ctrl+K</kbd>
+      </button>
+      <a href="/app" class="px-4 py-2 rounded-full bg-gold hover:bg-goldLight text-forest font-bold text-xs shadow transition">
+        Launch App →
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="mainContent" class="max-w-3xl mx-auto px-6 py-16 flex-1 text-center flex flex-col justify-center items-center space-y-6">
+    
+    <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-4xl shadow-md border-2 border-emerald-500">
+      ✓
+    </div>
+
+    <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-4 py-1.5 rounded-full">
+      APPLICATION CRYPTOGRAPHICALLY COMMITTED
+    </span>
+
+    <h1 class="font-serif text-3xl sm:text-5xl font-bold text-forest">
+      Priority Access Reserved
+    </h1>
+
+    <p class="text-slateText text-sm sm:text-base max-w-lg leading-relaxed">
+      Thank you for registering. Your organization has been placed into our verified attestation pipeline. A deployment confirmation has been dispatched.
+    </p>
+
+    <!-- Dynamic Queue Card -->
+    <div class="bg-white p-6 rounded-2xl border border-creamBorder card-shadow w-full max-w-md font-mono text-xs space-y-3">
+      <div class="flex justify-between border-b border-creamBorder pb-2">
+        <span class="text-slateText">Queue Priority Slot:</span>
+        <span class="font-bold text-forest text-sm" id="queuePosition">#1,429</span>
+      </div>
+      <div class="flex justify-between border-b border-creamBorder pb-2">
+        <span class="text-slateText">Hardware Enclave Tier:</span>
+        <span class="font-bold text-emerald-600">Intel TDX Cluster</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slateText">Estimated Provisioning:</span>
+        <span class="font-bold text-gold">< 24 Hours</span>
+      </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg text-left pt-4">
+      <a href="https://github.com/Northwind-Cipher/cool-sdk" target="_blank" class="p-5 rounded-2xl bg-forest text-cream border border-gold/40 hover:border-gold transition block">
+        <div class="text-gold font-bold font-serif text-sm mb-1">⭐ Star Repo on GitHub</div>
+        <p class="text-cream/70 text-xs font-mono">Support Northwind Cipher open-source evidence engine.</p>
+      </a>
+      <a href="/app" class="p-5 rounded-2xl bg-white border border-creamBorder hover:border-gold card-shadow transition block">
+        <div class="text-forest font-bold font-serif text-sm mb-1">⚡ Test Live Underwriter</div>
+        <p class="text-slateText text-xs font-mono">Submit dossiers and verify 6ms receipts now.</p>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-forest text-cream py-8 px-6 lg:px-16 border-t border-mint/40 text-center text-xs font-mono">
+    <p class="text-cream/70">Aegis Observability Suite • Northwind Cipher CooL SDK</p>
+  </footer>
+
+  <script src="/site.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const pos = urlParams.get("queue");
+    if (pos) {
+      document.getElementById("queuePosition").innerText = "#" + pos;
+    }
+  </script>
+</body>
+</html>

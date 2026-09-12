@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis — 5-Slide Submission (Reverse Hackathon)</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#0D2E27',
+            forestDark: '#071C17',
+            mint: '#1F4E43',
+            cream: '#F7F5F0',
+            gold: '#D4AF37',
+            goldLight: '#F5E6B3',
+            slateText: '#4A5568',
+            creamBorder: '#E7E2D6'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #F7F5F0;
+      color: #0D2E27;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .slide-card {
+      display: none;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide-card.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .gold-gradient {
+      background: linear-gradient(135deg, #D4AF37 0%, #B89324 100%);
+    }
+    @media print {
+      header, footer, .nav-btn { display: none !important; }
+      .slide-card { display: block !important; page-break-after: always; margin-bottom: 2rem; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Top Bar -->
+  <header class="bg-forest text-cream px-6 lg:px-16 py-4 border-b border-mint/30 flex flex-wrap justify-between items-center sticky top-0 z-50 gap-4">
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <a href="/" class="w-9 h-9 rounded bg-gold text-forest flex items-center justify-center font-serif font-bold text-lg shadow">
+          A
+        </a>
+        <div>
+          <a href="/" class="font-serif font-bold text-xl text-cream block">Aegis</a>
+          <span class="text-[10px] text-gold font-mono uppercase tracking-wider">5-Slide Hackathon Pitch</span>
+        </div>
+      </div>
+
+      <!-- Multi-Page App Navigation -->
+      <nav class="hidden sm:flex items-center gap-4 text-xs font-semibold text-cream/70 border-l border-mint/40 pl-5">
+        <a href="/" class="hover:text-gold transition">Home</a>
+        <a href="/app" class="hover:text-gold transition">Interactive App</a>
+        <a href="/audit" class="hover:text-gold transition">Audit Hub</a>
+      </nav>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-mono font-bold text-gold px-3 py-1 rounded bg-cream/10 border border-gold/30" id="slideBadge">
+        Slide 1 of 5
+      </span>
+      <button onclick="prevSlide()" class="nav-btn px-3 py-1.5 rounded bg-cream/10 hover:bg-cream/20 text-cream text-xs font-bold transition">
+        ← Prev
+      </button>
+      <button onclick="nextSlide()" id="nextBtn" class="nav-btn px-4 py-1.5 rounded gold-gradient text-forest font-bold text-xs shadow transition">
+        Next →
+      </button>
+      <button onclick="window.print()" class="nav-btn px-3 py-1.5 rounded border border-gold/40 text-gold hover:bg-gold/10 text-xs font-bold transition">
+        📄 PDF Export
+      </button>
+    </div>
+  </header>
+
+  <!-- Slide Deck Main Canvas -->
+  <main class="max-w-6xl w-full mx-auto px-6 py-12 flex-1 flex flex-col justify-center">
+
+    <!-- ================= SLIDE 1 ================= -->
+    <div class="slide-card active" id="slide-1">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-2.5 py-1 rounded">Slide 1 / 5</span>
+        <span class="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded">The Problem Statement 🎯</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-forest mb-3">
+        The Black-Box Liability Crisis in Autonomous AI
+      </h1>
+      <p class="text-lg text-slateText mb-8 max-w-3xl leading-relaxed">
+        When an AI agent approves a $150,000 loan or denies an insurance payout, there is no receipt. If the AI makes a catastrophic error, organizations have zero legally admissible proof of what actually occurred.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-full bg-rose-50 text-rose-700 flex items-center justify-center font-bold mb-4">1</div>
+            <h3 class="font-serif text-lg font-bold text-forest mb-2">What is the Problem?</h3>
+            <p class="text-xs text-slateText leading-relaxed mb-4">
+              Enterprises are giving autonomous AI agents financial authority. But standard database logs (Splunk, CloudWatch) are mutable—any database admin can alter rows. Courts reject them as unverified hearsay.
+            </p>
+          </div>
+          <div class="text-xs bg-cream p-3 rounded-lg border border-creamBorder font-mono text-slateText">
+            The Privacy Trap: GDPR forbids logging raw customer PII; omitting logs fails audits.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-full bg-forest/5 text-forest flex items-center justify-center font-bold mb-4">2</div>
+            <h3 class="font-serif text-lg font-bold text-forest mb-2">Who is Facing It?</h3>
+            <p class="text-xs text-slateText leading-relaxed mb-4">
+              14,000+ digital lenders, autonomous InsurTech claims processors, and enterprise SaaS teams facing CFPB, RBI Digital Lending, and European Central Bank audits.
+            </p>
+          </div>
+          <div class="text-xs bg-cream p-3 rounded-lg border border-creamBorder font-mono text-slateText">
+            Every company trusting AI with money, health, or legal decisions.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="w-8 h-8 rounded-full bg-gold/10 text-goldDark flex items-center justify-center font-bold mb-4">3</div>
+            <h3 class="font-serif text-lg font-bold text-forest mb-2">Why Urgent Right Now?</h3>
+            <p class="text-xs text-slateText leading-relaxed mb-4">
+              <strong>EU AI Act Article 12 is active</strong>: mandates automated record-keeping for high-risk AI, with fines up to <strong>€35M or 7% of worldwide turnover</strong>.
+            </p>
+          </div>
+          <div class="text-xs bg-cream p-3 rounded-lg border border-creamBorder font-mono text-mint font-bold">
+            84% of enterprise AI deployments are frozen purely due to liability fears.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 2 ================= -->
+    <div class="slide-card" id="slide-2">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-2.5 py-1 rounded">Slide 2 / 5</span>
+        <span class="text-xs font-bold text-mint bg-mint/10 border border-mint/20 px-2.5 py-0.5 rounded">Market Need & Research 🔍</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-forest mb-3">
+        From Advisory Chatbots to Multi-Billion Dollar Capital Allocators
+      </h1>
+      <p class="text-lg text-slateText mb-8 max-w-3xl leading-relaxed">
+        AI is no longer generating creative copy—it holds credit lines, approves mortgages, and modifies databases. The AI Governance market is exploding.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-gold uppercase tracking-wider">MARKET EXPANSION</span>
+          <h3 class="font-serif text-xl font-bold text-forest mt-2 mb-2">$10.2B GRC Market</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            The AI Governance, Risk & Compliance market is surging from $2.1B in 2024 to $10.2B by 2028 (48.5% CAGR). Grace periods have expired; active enforcement is live in the EU, US, and India.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-rose-600 uppercase tracking-wider">CRITICAL INDUSTRY GAP</span>
+          <h3 class="font-serif text-xl font-bold text-forest mt-2 mb-2">APMs Track Health, Not Truth</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            Datadog and OpenTelemetry monitor CPU and server latency. They provide zero cryptographic proof of model weights, input integrity, or runtime isolation. Audits take 4 painful weeks of manual document gathering.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-mint uppercase tracking-wider">MUST-HAVE VS NICE-TO-HAVE</span>
+          <h3 class="font-serif text-xl font-bold text-forest mt-2 mb-2">Statutory License to Operate</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            Tamper-proof record-keeping is not an optional developer tool. It is a mandatory statutory condition to operate high-risk AI in banking, lending, and healthcare.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 3 ================= -->
+    <div class="slide-card" id="slide-3">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-2.5 py-1 rounded">Slide 3 / 5</span>
+        <span class="text-xs font-bold text-forest bg-forest/10 border border-forest/20 px-2.5 py-0.5 rounded">Proposed Solution 💡</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-forest mb-3">
+        Aegis: The Digital Flight Recorder for Autonomous AI
+      </h1>
+      <p class="text-lg text-slateText mb-8 max-w-3xl leading-relaxed">
+        A zero-knowledge cryptographic compliance plane that wraps autonomous AI agents, producing self-contained, tamper-proof execution receipts.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <div class="text-2xl mb-3">🧾</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2">The "AI Digital Receipt"</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            Every autonomous decision generates a portable receipt (<code class="font-mono text-mint">cool.receipt.v2</code>). Anyone can verify the receipt offline on a laptop in 6ms with zero trust in our servers.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <div class="text-2xl mb-3">🔒</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2">Zero Plaintext Leakage</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            Solves the privacy conflict: sensitive customer records (SSN, income) are salted and hashed into commitments (<code class="font-mono text-mint">mh:sha256</code>); plaintext is immediately destroyed. 100% GDPR compliant.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <div class="text-2xl mb-3">🛡️</div>
+          <h3 class="font-serif text-lg font-bold text-forest mb-2">Hardware-Attested Enclaves</h3>
+          <p class="text-xs text-slateText leading-relaxed">
+            Runs inside Intel TDX Confidential VMs via Phala dstack. Signing keys are derived inside hardware memory and sealed to enclave measurements (<code class="font-mono text-mint">MRTD/RTMR</code>).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 4 ================= -->
+    <div class="slide-card" id="slide-4">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-2.5 py-1 rounded">Slide 4 / 5</span>
+        <span class="text-xs font-bold text-goldDark bg-gold/10 border border-gold/20 px-2.5 py-0.5 rounded">Using the Product 🛠️</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-forest mb-3">
+        Powered by Northwind Cipher's CooL SDK
+      </h1>
+      <p class="text-lg text-slateText mb-8 max-w-3xl leading-relaxed">
+        Deep architectural integration with <code class="font-mono text-forest font-bold">cool-nwc</code>, Phala dstack, and NIST FIPS 204 post-quantum cryptography.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-gold uppercase tracking-wider">CORE SDK APIS</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">cool.record({...})</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            Captures model execution, tool calls, and policy validations. Automatically discards plaintext and computes canonical CBOR commitments.
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2.5 rounded border border-creamBorder text-forest">
+            FIPS 204 ML-DSA-65 + Ed25519 dual hybrid signatures.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-mint uppercase tracking-wider">HARDWARE ATTESTATION</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">Phala dstack CVM</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            Interacts with <code class="font-mono">/var/run/dstack.sock</code>. Hardware quotes commit directly to the signing key, binding enclave identity to the signed record.
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2.5 rounded border border-creamBorder text-forest">
+            Fail-open for application, fail-closed for verifier.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-forest uppercase tracking-wider">AUDIT PACKS & DISCLOSURE</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">cool pack & disclose</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            <code class="font-mono font-bold">cool pack build</code> bundles receipts with automated coverage proofs for the EU AI Act and RBI-DLG. <code class="font-mono font-bold">cool disclose</code> enables single-field proof in court.
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2.5 rounded border border-creamBorder text-mint font-bold">
+            100% computed from receipts, never self-asserted.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SLIDE 5 ================= -->
+    <div class="slide-card" id="slide-5">
+      <div class="mb-4 flex items-center gap-2">
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-2.5 py-1 rounded">Slide 5 / 5</span>
+        <span class="text-xs font-bold text-mint bg-mint/10 border border-mint/20 px-2.5 py-0.5 rounded">Impact & Future Scope 🚀</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-5xl font-bold text-forest mb-3">
+        Transforming AI Compliance into an Automated Advantage
+      </h1>
+      <p class="text-lg text-slateText mb-8 max-w-3xl leading-relaxed">
+        From 4-week manual audit firefighting to an instantaneous, mathematically indisputable 6-millisecond verification.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-forest uppercase tracking-wider">BUSINESS ROI</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">90% Faster Audits</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            Replaces weeks of spreadsheet reconciliation with a 1-second CLI command (<code class="font-mono">cool verify</code>). Eliminates exposure to €35M non-compliance penalties under the EU AI Act.
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2 rounded border border-creamBorder text-forest font-bold">
+            Unlocks enterprise risk committee approvals.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-gold uppercase tracking-wider">TARGET CUSTOMERS</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">Regulated Enterprises</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            Immediate Day 1 buyers: High-volume consumer lenders (NuBank, Revolut, Klarna), automated InsurTech underwriters, and enterprise agent builders (LangGraph, CrewAI).
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2 rounded border border-creamBorder text-mint font-bold">
+            Zero developer friction: Pure TypeScript ESM.
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-creamBorder shadow-sm">
+          <span class="text-xs font-mono font-bold text-mint uppercase tracking-wider">ROADMAP HORIZONS</span>
+          <h3 class="font-serif text-lg font-bold text-forest mt-1 mb-2">Swarm Consensus & GPUs</h3>
+          <p class="text-xs text-slateText leading-relaxed mb-3">
+            Decentralized multi-agent consensus witness swarms for cross-bank loan syndication; NVIDIA H100/B200 NRAS confidential GPU attestation; and portfolio-wide ZK-proof aggregation.
+          </p>
+          <div class="text-[11px] font-mono bg-cream p-2 rounded border border-creamBorder text-forest font-bold">
+            The trust standard for the agentic economy.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Editorial Footer Navigation -->
+  <footer class="bg-white border-t border-creamBorder px-6 lg:px-16 py-4 flex justify-between items-center text-xs text-slateText">
+    <div class="flex items-center gap-2">
+      <span class="font-serif font-bold text-forest">Aegis</span>
+      <span>• Reverse Hackathon PPT Submission</span>
+    </div>
+    <div class="flex items-center gap-2 font-mono">
+      <span>Use</span>
+      <kbd class="px-2 py-0.5 rounded bg-cream border border-creamBorder text-forest font-bold">←</kbd>
+      <kbd class="px-2 py-0.5 rounded bg-cream border border-creamBorder text-forest font-bold">→</kbd>
+      <span>to flip slides</span>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide-card');
+    const badge = document.getElementById('slideBadge');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function update() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === currentSlide));
+      badge.innerText = `Slide ${currentSlide + 1} of ${slides.length}`;
+      nextBtn.innerText = currentSlide === slides.length - 1 ? 'Start Over ↺' : 'Next →';
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % slides.length;
+      update();
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+      update();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+  </script>
+</body>
+</html>

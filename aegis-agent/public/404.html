@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — Cryptographic Route Not Found | Aegis</title>
+  <meta name="description" content="The requested page hash does not exist in the Aegis merkle state tree. Return to verified routes.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#0D2E27',
+            forestDark: '#071C17',
+            mint: '#1F4E43',
+            cream: '#F7F5F0',
+            gold: '#D4AF37',
+            goldLight: '#F5E6B3',
+            slateText: '#4A5568',
+            creamBorder: '#E7E2D6'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body class="min-h-screen flex flex-col bg-cream text-forest selection:bg-gold selection:text-white">
+  <div id="scrollProgressBar"></div>
+  <a href="#mainContent" class="skip-to-content">Skip to main content</a>
+
+  <!-- Top Status -->
+  <div class="bg-forest text-cream text-xs py-2 px-6 lg:px-16 border-b border-mint/40 flex justify-between items-center font-mono">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+      <span class="font-bold">STATUS 404 • ROUTE UNCOMMITTED</span>
+    </div>
+    <div class="text-gold font-bold">
+      <a href="/" class="hover:underline">← Return to Verified Ledger</a>
+    </div>
+  </div>
+
+  <!-- Header with Oval Navigation -->
+  <header class="bg-cream/95 backdrop-blur-md sticky top-0 z-50 border-b border-creamBorder px-6 lg:px-16 py-3.5 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <a href="/" class="w-10 h-10 rounded-lg bg-forest flex items-center justify-center text-gold text-xl font-serif font-bold shadow-md">
+        A
+      </a>
+      <div>
+        <a href="/" class="font-serif font-bold text-2xl tracking-tight text-forest block">Aegis</a>
+        <span class="text-[10px] uppercase tracking-widest font-mono text-mint font-semibold">Autonomous Observability</span>
+      </div>
+    </div>
+
+    <!-- Oval Bubble Navigation -->
+    <nav class="hidden lg:flex items-center gap-2">
+      <a href="/" class="nav-oval-bubble">Home</a>
+      <a href="/app" class="nav-oval-bubble">Interactive App</a>
+      <a href="/audit" class="nav-oval-bubble">Audit Hub</a>
+      <a href="/case-studies" class="nav-oval-bubble">Case Studies</a>
+      <a href="/waitlist" class="nav-oval-bubble">Waitlist</a>
+      <a href="/about" class="nav-oval-bubble">About</a>
+      <a href="/contact" class="nav-oval-bubble">Contact</a>
+      <a href="/presentation" class="nav-oval-bubble">Pitch Deck</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button onclick="openSiteSearch()" class="px-3.5 py-1.5 rounded-full border border-creamBorder bg-white text-xs font-mono font-bold text-slateText hover:border-gold hover:text-forest transition flex items-center gap-1.5 shadow-sm">
+        <span>🔍 Search</span>
+        <kbd class="px-1.5 py-0.5 text-[10px] bg-cream rounded border border-creamBorder">Ctrl+K</kbd>
+      </button>
+      <a href="/app" class="px-4 py-2 rounded-full bg-gold hover:bg-goldLight text-forest font-bold text-xs shadow transition">
+        Launch App →
+      </a>
+    </div>
+  </header>
+
+  <!-- Main 404 Content -->
+  <main id="mainContent" class="max-w-4xl mx-auto px-6 py-20 flex-1 text-center flex flex-col justify-center items-center">
+    <div class="w-20 h-20 rounded-2xl bg-forest text-gold flex items-center justify-center text-4xl shadow-xl border-2 border-gold mb-6 font-serif">
+      404
+    </div>
+    <span class="text-xs font-mono font-bold text-rose-700 uppercase tracking-widest bg-rose-50 border border-rose-200 px-3.5 py-1 rounded-full mb-3">
+      CRYPTOGRAPHIC TREE INCLUSION FAILURE
+    </span>
+    <h1 class="font-serif text-3xl sm:text-5xl font-bold text-forest mb-4">
+      State Proof Not Found
+    </h1>
+    <p class="text-slateText text-sm sm:text-base max-w-lg mb-8 leading-relaxed">
+      The URI route you attempted to access does not have a verified leaf hash in our Merkle state tree. The page may have been pruned or relocated.
+    </p>
+
+    <!-- Quick Navigation Links -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl text-left font-mono text-xs">
+      <a href="/" class="p-4 rounded-xl bg-white border border-creamBorder hover:border-gold shadow-sm hover:shadow transition block">
+        <div class="font-bold text-forest font-serif text-sm mb-1">🏠 Executive Home</div>
+        <div class="text-slateText text-[11px]">Return to overview & live bento architecture.</div>
+      </a>
+      <a href="/app" class="p-4 rounded-xl bg-white border border-creamBorder hover:border-gold shadow-sm hover:shadow transition block">
+        <div class="font-bold text-forest font-serif text-sm mb-1">⚡ Interactive App</div>
+        <div class="text-slateText text-[11px]">Run arbitrary dossiers and seal 6ms receipts.</div>
+      </a>
+      <a href="/audit" class="p-4 rounded-xl bg-white border border-creamBorder hover:border-gold shadow-sm hover:shadow transition block">
+        <div class="font-bold text-forest font-serif text-sm mb-1">🛡️ Audit Hub</div>
+        <div class="text-slateText text-[11px]">Inspect EU AI Act & RBI Merkle logs.</div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-forest text-cream py-8 px-6 lg:px-16 border-t border-mint/40 text-center text-xs font-mono">
+    <p class="text-cream/70">Aegis Observability Suite • Northwind Cipher CooL SDK • Intel TDX Enclave Rail</p>
+  </footer>
+
+  <!-- Search Modal & Shared Scripts -->
+  <div id="siteSearchModal" onclick="if(event.target === this) closeSiteSearch();">
+    <div class="bg-forestDark border border-gold/40 rounded-2xl max-w-xl w-full p-5 shadow-2xl text-cream font-sans mx-4">
+      <div class="flex items-center justify-between pb-3 border-b border-mint/40">
+        <span class="font-serif font-bold text-base text-gold">Site Search & Navigator</span>
+        <button onclick="closeSiteSearch()" class="text-xs font-mono text-cream/60 hover:text-gold">Esc ✕</button>
+      </div>
+      <input type="text" id="siteSearchInput" placeholder="Type page or feature name..." class="w-full bg-forest border border-mint/50 rounded-lg px-3.5 py-2.5 mt-3 text-sm text-cream focus:outline-none focus:border-gold">
+      <div id="siteSearchResults" class="mt-3 space-y-1 max-h-64 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <button id="backToTopBtn" title="Back to Top">↑</button>
+  <script src="/site.js"></script>
+</body>
+</html>

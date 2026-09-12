@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis App — Autonomous Lending Execution & Verifier Plane</title>
+  <meta name="description" content="Execute arbitrary autonomous credit underwriting dossiers inside an Intel TDX CVM and verify post-quantum receipts offline in 6ms.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <!-- Google Fonts: Playfair Display + Plus Jakarta Sans + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#0D2E27',
+            forestDark: '#071C17',
+            mint: '#1F4E43',
+            mintLight: '#2D6B5D',
+            cream: '#F7F5F0',
+            creamCard: '#FFFFFF',
+            creamBorder: '#E7E2D6',
+            gold: '#D4AF37',
+            goldLight: '#F5E6B3',
+            slateText: '#4A5568'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/site.css">
+  <style>
+    body {
+      background-color: #F7F5F0;
+      color: #0D2E27;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #D4AF37 0%, #B89324 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+      transition: all 0.25s ease;
+    }
+    .btn-gold:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+      background: linear-gradient(135deg, #E0BC45 0%, #C49F30 100%);
+    }
+    .card-shadow {
+      box-shadow: 0 10px 30px -5px rgba(13, 46, 39, 0.06), 0 0 1px 1px rgba(13, 46, 39, 0.05);
+    }
+    .certificate-card {
+      background: #0D2E27;
+      border: 2px solid #D4AF37;
+      box-shadow: 0 20px 40px -10px rgba(13, 46, 39, 0.3);
+      transition: all 0.3s ease;
+    }
+    .certificate-card.tampered {
+      border-color: #DC2626 !important;
+      animation: gentleShake 0.4s ease;
+    }
+    @keyframes gentleShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-gold selection:text-white">
+  <div id="scrollProgressBar"></div>
+  <a href="#mainContent" class="skip-to-content">Skip to main content</a>
+
+  <!-- Top Banner -->
+  <div class="bg-forest text-cream text-xs py-2 px-6 lg:px-16 border-b border-mint/40 flex justify-between items-center font-mono">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-gold animate-pulse"></span>
+      <span class="font-bold">AEGIS EXECUTION SUITE</span>
+      <span class="text-gold/60">•</span>
+      <span class="text-gold">CONNECTED TO CooL SDK EVIDENCE ENGINE</span>
+    </div>
+    <div class="flex items-center gap-4 text-cream/70">
+      <span class="hidden sm:inline">Intel TDX Enclave: Local Attested Rail</span>
+      <a href="https://github.com/Northwind-Cipher/cool-sdk" target="_blank" class="text-gold font-bold hover:underline">⭐ Star Repo</a>
+    </div>
+  </div>
+
+  <!-- Editorial Header with Oval Bubble Navigation -->
+  <header class="bg-cream/95 backdrop-blur-md sticky top-0 z-50 border-b border-creamBorder px-6 lg:px-16 py-3.5 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <a href="/" class="w-10 h-10 rounded-lg bg-forest flex items-center justify-center text-gold text-xl font-serif font-bold shadow-md">
+        A
+      </a>
+      <div>
+        <a href="/" class="font-serif font-bold text-2xl tracking-tight text-forest block">Aegis</a>
+        <span class="text-[10px] uppercase tracking-widest font-mono text-mint font-semibold">Autonomous Underwriting App</span>
+      </div>
+    </div>
+
+    <!-- Oval Bubble Navigation -->
+    <nav class="hidden lg:flex items-center gap-2">
+      <a href="/" class="nav-oval-bubble">Home</a>
+      <a href="/app" class="nav-oval-bubble active">Interactive App</a>
+      <a href="/audit" class="nav-oval-bubble">Audit Hub</a>
+      <a href="/case-studies" class="nav-oval-bubble">Case Studies</a>
+      <a href="/waitlist" class="nav-oval-bubble">Waitlist</a>
+      <a href="/about" class="nav-oval-bubble">About</a>
+      <a href="/contact" class="nav-oval-bubble">Contact</a>
+      <a href="/presentation" class="nav-oval-bubble">Pitch Deck</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <button onclick="openSiteSearch()" class="px-3.5 py-1.5 rounded-full border border-creamBorder bg-white text-xs font-mono font-bold text-slateText hover:border-gold hover:text-forest transition flex items-center gap-1.5 shadow-sm">
+        <span>🔍 Search</span>
+        <kbd class="px-1.5 py-0.5 text-[10px] bg-cream rounded border border-creamBorder">Ctrl+K</kbd>
+      </button>
+      <a href="/audit" class="hidden sm:inline-block px-4 py-2 text-xs font-bold text-forest hover:text-gold transition border border-creamBorder rounded-full bg-white card-shadow">
+        Audit Pack ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Breadcrumbs -->
+  <nav aria-label="Breadcrumb" class="max-w-7xl mx-auto w-full px-6 lg:px-16 pt-6 pb-2 text-xs font-mono text-slateText flex items-center gap-2">
+    <a href="/" class="hover:text-gold transition">Home</a>
+    <span>/</span>
+    <span class="text-forest font-bold">Interactive App</span>
+  </nav>
+
+  <!-- Main App Workspace -->
+  <main id="mainContent" class="max-w-7xl mx-auto px-6 py-6 flex-1 w-full space-y-8">
+    
+    <div class="text-center sm:text-left flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-creamBorder pb-6">
+      <div>
+        <span class="text-xs font-mono font-bold uppercase tracking-widest text-gold bg-forest px-3.5 py-1 rounded-full">
+          DYNAMIC EXECUTION WORKSPACE
+        </span>
+        <h1 class="font-serif text-3xl sm:text-4xl font-bold text-forest mt-2">
+          Autonomous Credit Underwriter & Cryptographic Verifier
+        </h1>
+        <p class="text-slateText text-sm mt-1 max-w-2xl">
+          Enter any custom applicant or business dossier. Watch the autonomous agent evaluate credit parameters inside an Intel TDX enclave and produce an unalterable, post-quantum receipt.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-mono text-mint bg-mint/10 border border-mint/20 px-3.5 py-2 rounded-xl">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>CVM Enclave Active: 6ms Offline Checks</span>
+      </div>
+    </div>
+
+    <!-- 3-Column Interactive Workspace -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- STEP 1: DYNAMIC INPUT FORM (4 cols) -->
+      <div class="lg:col-span-4 bg-white p-7 rounded-2xl border border-creamBorder card-shadow">
+        <div class="flex justify-between items-center mb-4">
+          <span class="text-xs font-mono font-bold text-gold uppercase tracking-wider">STEP 1 • DOSSIER INPUT</span>
+          <span class="text-xs bg-forest/5 text-forest font-semibold px-2 py-0.5 rounded">Custom Evaluator</span>
+        </div>
+        
+        <h3 class="font-serif text-xl font-bold text-forest mb-1">Applicant Dossier</h3>
+        <p class="text-xs text-slateText mb-4">Enter any live applicant credentials or click dynamic generator:</p>
+
+        <!-- Dynamic Scenario Controls -->
+        <div class="flex items-center gap-2 mb-5">
+          <button type="button" onclick="generateRandomApplicant()" class="px-3 py-1.5 bg-mint/10 hover:bg-mint/20 text-mint text-xs font-bold rounded-lg border border-mint/30 transition flex items-center gap-1.5 shadow-sm">
+            <span>🎲 Generate Random Applicant</span>
+          </button>
+          <button type="button" onclick="clearForm()" class="px-3 py-1.5 bg-cream hover:bg-creamBorder text-slateText hover:text-rose-700 text-xs font-bold rounded-lg border border-creamBorder transition ml-auto">
+            <span>🗑️ Clear Form</span>
+          </button>
+        </div>
+
+        <form id="applicationForm" onsubmit="event.preventDefault(); executeAutonomousAgent();" class="space-y-3.5 text-xs">
+          
+          <div>
+            <label class="block font-bold text-forest uppercase tracking-wider mb-1">Applicant Name / Business Entity</label>
+            <input type="text" id="inputName" required placeholder="e.g. Apex Logistics Ltd. or Acme Corp" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-medium focus:outline-none focus:border-gold transition">
+          </div>
+
+          <div>
+            <label class="block font-bold text-forest uppercase tracking-wider mb-1">Loan Product Category</label>
+            <select id="inputType" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-medium focus:outline-none focus:border-gold transition">
+              <option value="SME Working Capital">SME Working Capital Facility</option>
+              <option value="Commercial Real Estate">Commercial Real Estate Debt</option>
+              <option value="Personal Auto Loan">Personal Automotive Credit</option>
+              <option value="Venture Debt Facility">Venture Debt Facility</option>
+              <option value="Green Energy Project">Green Energy Project Finance</option>
+              <option value="Trade Invoice Factoring">Trade Invoice Factoring</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-forest uppercase tracking-wider mb-1">Requested Amount ($)</label>
+              <input type="number" id="inputRequested" required min="1000" step="1000" placeholder="e.g. 150000" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-mono font-bold focus:outline-none focus:border-gold transition">
+            </div>
+            <div>
+              <label class="block font-bold text-forest uppercase tracking-wider mb-1">Annual Revenue ($)</label>
+              <input type="number" id="inputRevenue" required min="1000" step="5000" placeholder="e.g. 1200000" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-mono font-bold focus:outline-none focus:border-gold transition">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="font-bold text-forest uppercase tracking-wider">Credit Score (FICO)</label>
+                <span id="scoreBadge" class="font-mono text-[10px] font-bold text-slateText">Custom Tier</span>
+              </div>
+              <input type="number" id="inputScore" oninput="updateScoreBadge()" required min="300" max="850" placeholder="e.g. 740" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-mono font-bold focus:outline-none focus:border-gold transition">
+            </div>
+            <div>
+              <label class="block font-bold text-forest uppercase tracking-wider mb-1">Debt-to-Income (%)</label>
+              <input type="number" id="inputDti" required min="1" max="100" step="1" placeholder="e.g. 25" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 text-forest font-mono font-bold focus:outline-none focus:border-gold transition">
+            </div>
+          </div>
+
+          <!-- Tax ID with Password/Secret Visibility Toggle -->
+          <div>
+            <label class="block font-bold text-forest uppercase tracking-wider mb-1">Tax ID / SSN (Confidential PII)</label>
+            <div class="relative">
+              <input type="password" id="inputTaxId" required placeholder="e.g. US-EIN-920194 or TAX-ID" class="w-full bg-cream border border-creamBorder rounded-lg px-3 py-2 pr-16 text-rose-800 font-mono font-bold focus:outline-none focus:border-gold transition">
+              <button type="button" id="toggleTaxBtn" onclick="toggleSecretVisibility('inputTaxId', 'toggleTaxBtn')" class="absolute right-2 top-2 text-[10px] font-mono font-bold text-slateText hover:text-forest bg-creamBorder px-2 py-0.5 rounded transition">👁️ Show</button>
+            </div>
+            <span class="text-[10px] text-mint font-medium mt-1 block">
+              🔒 Salted multihash will be sealed; plaintext purged immediately.
+            </span>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btnRunAgent" class="btn-gold w-full py-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 shadow-md">
+              <span>⚡ Execute Autonomous Underwriter</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- STEP 2: ENCLAVE DECISION & REAL-TIME CONTROLS (4 cols) -->
+      <div class="lg:col-span-4 bg-white p-7 rounded-2xl border border-creamBorder card-shadow flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-xs font-mono font-bold text-gold uppercase tracking-wider">STEP 2 • ENCLAVE EVALUATION</span>
+            <span class="text-xs bg-mint/10 text-mint font-semibold px-2 py-0.5 rounded">Intel TDX Enclave</span>
+          </div>
+          <h3 class="font-serif text-xl font-bold text-forest mb-1">Algorithmic Decision</h3>
+          <p class="text-xs text-slateText mb-5">Calculated autonomously inside hardware memory with sealed keys.</p>
+
+          <div class="bg-cream rounded-xl p-5 border border-creamBorder text-center mb-5">
+            <div id="aiBadge" class="inline-block px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-forest/5 text-slateText mb-3">
+              READY FOR INPUT
+            </div>
+            <div id="aiDecisionText" class="text-sm font-serif text-forest font-semibold leading-snug">
+              Fill the dossier and click "Execute Autonomous Underwriter".
+            </div>
+            
+            <!-- Dynamic Decision Attributes -->
+            <div id="decisionDetails" class="hidden mt-4 pt-3 border-t border-creamBorder text-left space-y-1.5 text-xs font-mono">
+              <div class="flex justify-between">
+                <span class="text-slateText">Approved Facility:</span>
+                <strong class="text-forest font-bold" id="approvedAmountDisp">$0</strong>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slateText">Risk Tier:</span>
+                <span class="text-mint font-bold" id="riskTierDisp">Tier-1</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slateText">Execution Time:</span>
+                <span class="text-slateText" id="execTimestampDisp">Just now</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-forest/5 rounded-xl p-4 border border-forest/10 text-xs text-slateText space-y-2 mb-6">
+            <div class="flex items-center gap-1.5 text-forest font-bold">
+              <span>🔒</span>
+              <span>Zero-Exposure Privacy Guarantee</span>
+            </div>
+            <p class="leading-relaxed">
+              Customer tax ID and financial values are hashed into cryptographic commitments (<code class="font-mono text-mint">mh:sha256</code>). Plaintext data is never stored in the audit trail.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-2.5">
+          <button id="btnVerifyReceipt" onclick="verifyActiveReceipt()" disabled class="w-full py-3 bg-forest text-gold rounded-lg text-xs font-bold border border-forest hover:bg-forestDark transition disabled:opacity-40 disabled:cursor-not-allowed shadow">
+            ✓ Verify Receipt Offline (6ms)
+          </button>
+          <button id="btnTamperReceipt" onclick="tamperActiveReceipt()" disabled class="w-full py-2.5 bg-white text-rose-700 border border-rose-200 rounded-lg text-xs font-bold hover:bg-rose-50 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            ⚠️ Tamper Demonstration (Flip 1 Byte in Hash)
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3: THE SEALED DIGITAL RECEIPT (4 cols) -->
+      <div class="lg:col-span-4 certificate-card text-cream p-7 rounded-2xl relative" id="receiptVisualCard">
+        <div class="flex justify-between items-start border-b border-gold/30 pb-4 mb-4">
+          <div>
+            <div class="font-serif text-lg font-bold text-gold tracking-wide">EXECUTION RECEIPT</div>
+            <div class="text-[11px] font-mono text-cream/60">cool.receipt.v2 • Hardware Attested</div>
+          </div>
+          <div id="receiptStamp" class="px-2.5 py-1 rounded bg-cream/10 border border-gold/40 text-gold text-[11px] font-mono font-bold tracking-wider">
+            STANDBY
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs mb-5 font-mono">
+          <div class="flex justify-between items-center">
+            <span class="text-cream/60">Record ID:</span>
+            <span class="text-gold font-bold truncate max-w-[150px]" id="recIdDisp">Waiting for execute...</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-cream/60">Attested Model:</span>
+            <span class="text-cream" id="modelDisp">aegis-credit@v4.2</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-cream/60">Signatures:</span>
+            <span class="text-emerald-400">ML-DSA-65 + Ed25519</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-cream/60">Merkle Tree Log:</span>
+            <span class="text-cream/80" id="merkleSizeDisp">RFC 6962 Tree Size: Active</span>
+          </div>
+          <div class="border-t border-gold/20 pt-2 flex justify-between items-center">
+            <span class="text-cream/60">Metadata Hash:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-gold truncate max-w-[120px]" id="hashCodeDisp">mh:sha256:waiting</span>
+              <button type="button" onclick="copyToClipboard(document.getElementById('hashCodeDisp').innerText, this)" class="text-[10px] text-gold font-mono px-2 py-0.5 border border-gold/40 rounded hover:bg-gold/20 transition">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gold/30 pt-4 flex items-center justify-between">
+          <div class="w-10 h-10 rounded border border-gold/40 flex items-center justify-center text-gold font-serif text-lg font-bold">
+            ✓
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] text-cream/50 uppercase tracking-wider font-mono">Verifier Engine</div>
+            <div class="text-xs text-gold font-bold font-serif">Northwind Cipher CooL</div>
+          </div>
+        </div>
+
+        <button id="btnDisclose" onclick="triggerSelectiveDisclosure()" disabled class="w-full mt-4 py-2.5 bg-cream/10 hover:bg-cream/20 text-cream rounded text-xs font-mono font-bold border border-gold/40 transition disabled:opacity-40 disabled:cursor-not-allowed">
+          🔓 Subpoena Test (Disclose Decision Only)
+        </button>
+      </div>
+
+    </div>
+
+    <!-- IN-SITU ACTIVITY MEME REACTION CARD -->
+    <div id="activityMemeBox" class="hidden bg-white border border-creamBorder p-6 rounded-2xl card-shadow transition-all">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <!-- Video reaction player (4 cols) -->
+        <div class="md:col-span-4 rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center shadow-inner">
+          <video id="memeVideoPlayer" class="w-full h-full object-contain" playsinline loop></video>
+        </div>
+
+        <!-- Explanatory content (8 cols) -->
+        <div class="md:col-span-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-gold/20 text-forest" id="memeBadgeText">
+                ACTIVITY REACTION
+              </span>
+              <span class="text-xs text-slateText font-mono" id="memeTimestamp">Verified in 6ms</span>
+            </div>
+            <h3 class="font-serif text-xl font-bold text-forest mt-1" id="memeHeaderTitle">
+              Clean Mathematical Verification
+            </h3>
+            <p class="text-xs sm:text-sm text-slateText mt-1.5 leading-relaxed" id="memeDescriptionText">
+              The receipt was checked offline across all 7 cryptographic domains. Zero data leakage occurred.
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-creamBorder flex items-center justify-between">
+            <span class="text-[11px] font-mono text-mint font-bold" id="memeStatusNote">
+              • Post-Quantum Signature Valid
+            </span>
+            <button onclick="dismissMemeBox()" class="text-xs font-bold text-forest hover:text-gold transition">
+              Dismiss Activity Reaction ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Alert Banner -->
+    <div id="alertBanner" class="hidden p-5 rounded-xl border transition-all">
+      <div class="flex items-center gap-3">
+        <span id="alertIcon" class="text-2xl">✓</span>
+        <div>
+          <h4 id="alertTitle" class="font-serif font-bold text-base">VERIFIED</h4>
+          <p id="alertDesc" class="text-xs mt-0.5 leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Sticky Mobile Action Bar -->
+  <div class="sticky-mobile-cta lg:hidden">
+    <button onclick="document.getElementById('inputName').focus()" class="flex-1 py-2.5 bg-gold text-forest rounded-full font-bold text-xs text-center shadow">
+      ⚡ Underwrite
+    </button>
+    <a href="/audit" class="flex-1 py-2.5 bg-forest text-gold border border-gold/40 rounded-full font-bold text-xs text-center">
+      🛡️ Audit Pack
+    </a>
+  </div>
+
+  <!-- Editorial Footer -->
+  <footer class="bg-forest text-cream py-10 px-6 lg:px-16 border-t border-mint/40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono">
+      <div class="flex items-center gap-2">
+        <span class="w-6 h-6 rounded bg-gold text-forest flex items-center justify-center font-bold">A</span>
+        <span class="font-serif font-bold text-sm text-cream">Aegis Agentic Suite</span>
+      </div>
+      <div class="text-cream/60">
+        Northwind Cipher CooL SDK • Intel TDX Confidential VM
+      </div>
+      <div class="flex items-center gap-4 text-gold font-semibold">
+        <a href="/" class="hover:underline">Home</a>
+        <a href="/case-studies" class="hover:underline">Case Studies</a>
+        <a href="/audit" class="hover:underline">Audit Pack</a>
+        <a href="/waitlist" class="hover:underline">Waitlist</a>
+        <a href="/privacy" class="hover:underline">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dark Simple Cookie Consent Banner -->
+  <div id="cookieConsentBanner">
+    <div class="text-xs leading-relaxed max-w-sm">
+      <span class="font-bold text-gold">Privacy Notice:</span> We use strictly essential cookies for enclave session attestation. No third-party trackers.
+    </div>
+    <div class="flex items-center gap-2 font-mono text-xs">
+      <a href="/privacy" class="text-gold underline mr-1">Read Policy</a>
+      <button onclick="declineCookies()" class="px-3 py-1.5 rounded-lg border border-mint text-cream/80 hover:bg-forest text-[11px]">Decline</button>
+      <button onclick="acceptCookies()" class="px-3 py-1.5 rounded-lg bg-gold text-forest font-bold text-[11px]">Accept</button>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div id="siteSearchModal" onclick="if(event.target === this) closeSiteSearch();">
+    <div class="bg-forestDark border border-gold/40 rounded-2xl max-w-xl w-full p-5 shadow-2xl text-cream font-sans mx-4">
+      <div class="flex items-center justify-between pb-3 border-b border-mint/40">
+        <span class="font-serif font-bold text-base text-gold">Site Search & Navigator</span>
+        <button onclick="closeSiteSearch()" class="text-xs font-mono text-cream/60 hover:text-gold">Esc ✕</button>
+      </div>
+      <input type="text" id="siteSearchInput" placeholder="Type page or feature name..." class="w-full bg-forest border border-mint/50 rounded-lg px-3.5 py-2.5 mt-3 text-sm text-cream focus:outline-none focus:border-gold">
+      <div id="siteSearchResults" class="mt-3 space-y-1 max-h-64 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <button id="backToTopBtn" title="Back to Top">↑</button>
+
+  <!-- Audio Sound Effect -->
+  <audio id="audioEffect" src="/memes/faah-reverb.mp3" preload="auto"></audio>
+
+  <!-- Shared Scripts & Dynamic Client -->
+  <script src="/site.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
