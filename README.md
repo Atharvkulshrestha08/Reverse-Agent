@@ -1,3 +1,9 @@
+> ### 🛡️ Author & Original Creator
+> **Atharv Kulshrestha** — [@Atharvkulshrestha08](https://github.com/Atharvkulshrestha08)  
+> *This repository and its codebase are the original work of Atharv Kulshrestha. All rights reserved.*
+
+---
+
 # 🛡️ AegisAgent — Autonomous AI Flight Recorder & Cryptographic Attestation Rail
 
 [![Reverse Hackathon 2026](https://img.shields.io/badge/Event-Reverse%20Hackathon%202026-0D2E27?style=for-the-badge&logo=target)](https://github.com/Northwind-Cipher/cool-sdk)
